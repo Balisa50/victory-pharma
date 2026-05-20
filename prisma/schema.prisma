@@ -1,0 +1,203 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  wholesale_admin
+  retail_pharmacy
+}
+
+enum OrderStatus {
+  pending
+  confirmed
+  packed
+  out_for_delivery
+  delivered
+  cancelled
+}
+
+enum PaymentMethod {
+  cash
+  mobile_money
+  bank_transfer
+}
+
+enum PaymentStatus {
+  pending_confirmation
+  confirmed
+  rejected
+}
+
+enum ComplaintType {
+  wrong_item
+  damaged_item
+  missing_item
+  delayed_delivery
+  billing_issue
+  other
+}
+
+enum ComplaintStatus {
+  pending
+  in_review
+  resolved
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  password      String
+  phone         String
+  pharmacyName  String?
+  role          UserRole
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  orders        Order[]
+  reviews       Review[]
+  complaints    Complaint[]
+  receipts      Receipt[]
+
+  @@map("users")
+}
+
+model Product {
+  id                 String   @id @default(cuid())
+  name               String
+  category           String
+  price              Decimal  @db.Decimal(12, 2)
+  stockQuantity      Int      @default(0)
+  expiryDate         DateTime?
+  availabilityStatus Boolean  @default(true)
+  deletedAt          DateTime?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  orderItems OrderItem[]
+
+  @@index([name])
+  @@index([category])
+  @@index([availabilityStatus])
+  @@map("products")
+}
+
+model Order {
+  id                String      @id @default(cuid())
+  retailPharmacyId  String
+  status            OrderStatus @default(pending)
+  totalAmount       Decimal     @db.Decimal(12, 2)
+  notes             String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  retailPharmacy    User        @relation(fields: [retailPharmacyId], references: [id])
+  orderItems        OrderItem[]
+  payment           Payment?
+  statusHistory     OrderStatusHistory[]
+  review            Review?
+  complaints        Complaint[]
+  receipt           Receipt?
+
+  @@index([retailPharmacyId, status])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String  @id @default(cuid())
+  orderId    String
+  productId  String
+  productName String
+  quantity   Int
+  unitPrice  Decimal @db.Decimal(12, 2)
+  subtotal   Decimal @db.Decimal(12, 2)
+
+  order      Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product    Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+model OrderStatusHistory {
+  id        String      @id @default(cuid())
+  orderId   String
+  status    OrderStatus
+  changedAt DateTime    @default(now())
+  changedBy String?
+
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("order_status_history")
+}
+
+model Payment {
+  id        String        @id @default(cuid())
+  orderId   String        @unique
+  amount    Decimal       @db.Decimal(12, 2)
+  method    PaymentMethod
+  status    PaymentStatus @default(pending_confirmation)
+  notes     String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  order     Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, status])
+  @@map("payments")
+}
+
+model Receipt {
+  id               String   @id @default(cuid())
+  orderId          String   @unique
+  retailPharmacyId String
+  totalAmount      Decimal  @db.Decimal(12, 2)
+  generatedAt      DateTime @default(now())
+
+  order            Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  retailPharmacy   User     @relation(fields: [retailPharmacyId], references: [id])
+
+  @@index([retailPharmacyId])
+  @@map("receipts")
+}
+
+model Review {
+  id               String   @id @default(cuid())
+  orderId          String   @unique
+  retailPharmacyId String
+  rating           Int
+  comment          String?
+  createdAt        DateTime @default(now())
+
+  order            Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  retailPharmacy   User     @relation(fields: [retailPharmacyId], references: [id])
+
+  @@index([retailPharmacyId])
+  @@map("reviews")
+}
+
+model Complaint {
+  id               String          @id @default(cuid())
+  orderId          String
+  retailPharmacyId String
+  type             ComplaintType
+  description      String
+  status           ComplaintStatus @default(pending)
+  internalNotes    String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  order            Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  retailPharmacy   User            @relation(fields: [retailPharmacyId], references: [id])
+
+  @@index([retailPharmacyId])
+  @@index([status])
+  @@map("complaints")
+}
