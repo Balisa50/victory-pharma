@@ -59,12 +59,32 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  // B2B approval workflow
+  status            UserStatus @default(pending)
+  approvedBy        String?
+  verifiedAt        DateTime?
+  pharmacyId        String?    @unique
+  rejectionReason   String?
+  location          String?
+  businessRegNumber String?
+  licenseNumber     String?
+
+  approver  User?  @relation("AdminApprovals", fields: [approvedBy], references: [id], onDelete: SetNull)
+  approvals User[] @relation("AdminApprovals")
+
   orders        Order[]
   reviews       Review[]
   complaints    Complaint[]
   receipts      Receipt[]
 
+  @@index([status])
   @@map("users")
+}
+
+enum UserStatus {
+  pending
+  active
+  rejected
 }
 
 model Product {

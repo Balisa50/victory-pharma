@@ -24,11 +24,14 @@ const config: NextAuthConfig = {
         const valid = await bcrypt.compare(parsed.data.password, user.password);
         if (!valid) return null;
 
+        // Non-active retail pharmacies may sign in, but the middleware confines
+        // them to /pending-approval until an admin verifies the account.
         return {
           id: user.id,
           name: user.name,
           email: user.email,
           role: user.role,
+          status: user.status,
           pharmacyName: user.pharmacyName,
         };
       },
@@ -39,6 +42,7 @@ const config: NextAuthConfig = {
       if (user) {
         token.id = user.id as string;
         token.role = (user as { role: string }).role;
+        token.status = (user as { status: string }).status;
         token.pharmacyName = (user as { pharmacyName: string | null }).pharmacyName;
       }
       return token;
@@ -46,6 +50,7 @@ const config: NextAuthConfig = {
     session({ session, token }) {
       session.user.id = token.id as string;
       session.user.role = token.role as string;
+      session.user.status = token.status as string;
       session.user.pharmacyName = token.pharmacyName as string | null;
       return session;
     },
@@ -61,6 +66,7 @@ declare module "next-auth" {
       name: string;
       email: string;
       role: string;
+      status: string;
       pharmacyName: string | null;
     };
   }

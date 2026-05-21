@@ -18,6 +18,7 @@ import {
 
 const NAV_ITEMS = [
   { href: "/wholesale/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/wholesale/verification", label: "Verification", icon: ShieldCheck },
   { href: "/wholesale/products", label: "Products", icon: Package },
   { href: "/wholesale/orders", label: "Orders", icon: ClipboardList },
   { href: "/wholesale/reviews", label: "Reviews", icon: Star },

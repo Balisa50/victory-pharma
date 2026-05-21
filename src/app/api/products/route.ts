@@ -7,6 +7,9 @@ import { CATALOG_PAGE_SIZE } from "@/lib/utils";
 export async function GET(req: NextRequest) {
   const session = await auth();
   if (!session?.user) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+  if (session.user.role === "retail_pharmacy" && session.user.status !== "active") {
+    return NextResponse.json({ success: false, error: "Account not approved" }, { status: 403 });
+  }
 
   const { searchParams } = req.nextUrl;
   const search = searchParams.get("search") ?? "";

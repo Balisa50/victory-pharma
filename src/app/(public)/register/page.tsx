@@ -35,7 +35,7 @@ export default function RegisterPage() {
         toast.error(json.error ?? "Registration failed");
         return;
       }
-      toast.success("Account created! Please sign in.");
+      toast.success("Application submitted. Awaiting verification.");
       router.push("/login");
     } finally {
       setLoading(false);
@@ -72,13 +72,13 @@ export default function RegisterPage() {
             Register your <em>pharmacy</em>.
           </h1>
           <p className="text-center text-[13.5px] font-light leading-relaxed text-neutral-500">
-            Takes a minute. Start ordering today.
+            Applications are verified by our team within 24 to 48 hours.
           </p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label className={labelClass}>Full name</label>
+            <label className={labelClass}>Owner full name</label>
             <input {...register("name")} className={fieldClass} placeholder="Jane Smith" />
             {errors.name && <p className="mt-1 text-xs text-[hsl(var(--red))]">{errors.name.message}</p>}
           </div>
@@ -92,6 +92,19 @@ export default function RegisterPage() {
             />
             {errors.pharmacyName && (
               <p className="mt-1 text-xs text-[hsl(var(--red))]">{errors.pharmacyName.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className={labelClass}>Pharmacy location</label>
+            <textarea
+              {...register("location")}
+              rows={2}
+              className={fieldClass}
+              placeholder="Street, city, region"
+            />
+            {errors.location && (
+              <p className="mt-1 text-xs text-[hsl(var(--red))]">{errors.location.message}</p>
             )}
           </div>
 
@@ -123,6 +136,26 @@ export default function RegisterPage() {
             </div>
           </div>
 
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className={labelClass}>Business reg. no.</label>
+              <input
+                {...register("businessRegNumber")}
+                className={fieldClass}
+                placeholder="Optional"
+              />
+            </div>
+
+            <div>
+              <label className={labelClass}>License no.</label>
+              <input
+                {...register("licenseNumber")}
+                className={fieldClass}
+                placeholder="Optional"
+              />
+            </div>
+          </div>
+
           <div>
             <label className={labelClass}>Password</label>
             <input
@@ -144,7 +177,7 @@ export default function RegisterPage() {
             className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-[hsl(var(--red))] py-3 text-sm font-semibold tracking-wide text-white transition-all hover:bg-[hsl(var(--red))]/90 hover:-translate-y-px disabled:opacity-60 disabled:hover:translate-y-0"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-            Create account
+            Submit application
           </button>
         </form>
 

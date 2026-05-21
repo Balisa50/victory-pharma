@@ -34,6 +34,9 @@ export async function POST(req: NextRequest) {
   if (session?.user?.role !== "retail_pharmacy") {
     return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
   }
+  if (session.user.status !== "active") {
+    return NextResponse.json({ success: false, error: "Account not approved" }, { status: 403 });
+  }
 
   const body: unknown = await req.json();
   const parsed = createComplaintSchema.safeParse(body);

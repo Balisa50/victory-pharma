@@ -17,7 +17,10 @@ export const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
   phone: z.string().min(7, "Phone number is required"),
   password: passwordSchema,
-  pharmacyName: z.string().optional(),
+  pharmacyName: z.string().min(2, "Pharmacy name is required"),
+  location: z.string().min(5, "Pharmacy location is required"),
+  businessRegNumber: z.string().optional(),
+  licenseNumber: z.string().optional(),
   role: z.nativeEnum(UserRole),
 });
 
