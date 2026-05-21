@@ -11,7 +11,6 @@ import {
   ShoppingCart,
   Package,
   Receipt,
-  MessageSquareWarning,
   Phone,
   LogOut,
   Pill,
@@ -32,41 +31,59 @@ export function RetailSidebar({ pharmacyName }: { pharmacyName: string | null })
 
   return (
     <>
-      {/* Desktop sidebar */}
-      <aside className="hidden w-64 flex-col border-r border-gray-100 bg-white md:flex">
-        <div className="flex h-16 items-center gap-2 border-b border-gray-100 px-6">
-          <Pill className="h-5 w-5 text-blue-600" />
-          <span className="font-semibold text-blue-900">Victory Pharma</span>
+      {/* Desktop sidebar — navy with gold accents */}
+      <aside className="hidden w-64 flex-col border-r border-[hsl(var(--navy))]/10 bg-[hsl(var(--navy))] text-white md:flex">
+        <div className="flex h-[68px] items-center gap-3 border-b-2 border-[hsl(var(--gold))] px-6">
+          <div className="grid h-9 w-9 place-items-center rounded-full bg-white/10 ring-2 ring-white/15">
+            <Pill className="h-4 w-4 text-[hsl(var(--gold))]" />
+          </div>
+          <span className="serif text-[15px] tracking-wide">
+            Victory <span className="text-[hsl(var(--gold))]">Pharma</span>
+          </span>
         </div>
-        <div className="px-4 py-3">
-          <p className="truncate text-xs text-gray-500">{pharmacyName ?? "Retail Pharmacy"}</p>
+
+        <div className="px-6 py-4">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">
+            Pharmacy
+          </p>
+          <p className="mt-1 truncate text-[13px] text-white/85">
+            {pharmacyName ?? "Retail Pharmacy"}
+          </p>
         </div>
-        <nav className="flex-1 space-y-1 px-3 py-2">
-          {NAV_ITEMS.map(({ href, label, icon: Icon, showBadge }) => (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                pathname.startsWith(href)
-                  ? "bg-blue-50 text-blue-700"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-              )}
-            >
-              <Icon className="h-4 w-4 shrink-0" />
-              {label}
-              {showBadge && itemCount > 0 && (
-                <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-xs text-white">
-                  {itemCount}
-                </span>
-              )}
-            </Link>
-          ))}
+
+        <nav className="flex-1 space-y-0.5 px-3 py-2">
+          {NAV_ITEMS.map(({ href, label, icon: Icon, showBadge }) => {
+            const active = pathname.startsWith(href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={cn(
+                  "relative flex items-center gap-3 rounded-md px-3 py-2.5 text-[13px] font-medium tracking-wide transition-colors",
+                  active
+                    ? "bg-white/10 text-[hsl(var(--gold))]"
+                    : "text-white/65 hover:bg-white/5 hover:text-white"
+                )}
+              >
+                {active && (
+                  <span className="absolute inset-y-1.5 left-0 w-[3px] rounded-r-full bg-[hsl(var(--gold))]" />
+                )}
+                <Icon className="h-4 w-4 shrink-0" />
+                {label}
+                {showBadge && itemCount > 0 && (
+                  <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-[hsl(var(--red))] px-1.5 text-[10px] font-bold text-white">
+                    {itemCount}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
         </nav>
-        <div className="border-t border-gray-100 p-3">
+
+        <div className="border-t border-white/10 p-3">
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
+            className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-[13px] font-medium text-white/55 transition-colors hover:bg-white/5 hover:text-white"
           >
             <LogOut className="h-4 w-4" />
             Sign out
@@ -75,25 +92,28 @@ export function RetailSidebar({ pharmacyName }: { pharmacyName: string | null })
       </aside>
 
       {/* Mobile bottom nav */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-gray-200 bg-white md:hidden">
-        {NAV_ITEMS.slice(0, 5).map(({ href, label, icon: Icon, showBadge }) => (
-          <Link
-            key={href}
-            href={href}
-            className={cn(
-              "relative flex flex-1 flex-col items-center gap-0.5 py-2 text-xs font-medium",
-              pathname.startsWith(href) ? "text-blue-600" : "text-gray-500"
-            )}
-          >
-            <Icon className="h-5 w-5" />
-            {label}
-            {showBadge && itemCount > 0 && (
-              <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[10px] text-white">
-                {itemCount}
-              </span>
-            )}
-          </Link>
-        ))}
+      <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t-2 border-[hsl(var(--gold))] bg-[hsl(var(--navy))] md:hidden">
+        {NAV_ITEMS.slice(0, 5).map(({ href, label, icon: Icon, showBadge }) => {
+          const active = pathname.startsWith(href);
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={cn(
+                "relative flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium tracking-wide",
+                active ? "text-[hsl(var(--gold))]" : "text-white/55"
+              )}
+            >
+              <Icon className="h-5 w-5" />
+              {label}
+              {showBadge && itemCount > 0 && (
+                <span className="absolute right-2 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[hsl(var(--red))] px-1 text-[9px] font-bold text-white">
+                  {itemCount}
+                </span>
+              )}
+            </Link>
+          );
+        })}
       </nav>
     </>
   );

@@ -1,7 +1,3 @@
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {children}
-    </main>
-  );
+  return <main className="min-h-screen bg-[hsl(var(--offwhite))]">{children}</main>;
 }
