@@ -12,7 +12,8 @@ const dmSans = DM_Sans({
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  // Display headings render at a single weight; only 400 + italic are used.
+  weight: ["400"],
   style: ["normal", "italic"],
   variable: "--font-serif",
   display: "swap",

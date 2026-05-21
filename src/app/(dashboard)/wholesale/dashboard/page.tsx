@@ -1,19 +1,22 @@
 "use client";
 
 import useSWR from "swr";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import dynamic from "next/dynamic";
 import { formatCurrency } from "@/lib/utils";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { EmptyState } from "@/components/shared/EmptyState";
 import type { WholesaleDashboardData } from "@/types";
 import { useMemo } from "react";
+
+// Charts (recharts) load on demand so they stay out of the initial bundle.
+const RevenueSparkline = dynamic(
+  () => import("@/components/shared/RevenueChart").then((m) => m.RevenueSparkline),
+  { ssr: false }
+);
+const RevenueArea = dynamic(
+  () => import("@/components/shared/RevenueChart").then((m) => m.RevenueArea),
+  { ssr: false, loading: () => <div className="h-[240px] animate-pulse rounded bg-neutral-50" /> }
+);
 
 const fetcher = (url: string) =>
   fetch(url).then((r) => r.json()).then((d) => d.data);
@@ -112,25 +115,7 @@ export default function WholesaleDashboard() {
 
               {/* Inline sparkline */}
               <div className="-mb-2 h-24">
-                {chart.length > 0 && (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={chart}>
-                      <defs>
-                        <linearGradient id="sparkGold" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#c8a84b" stopOpacity={0.6} />
-                          <stop offset="100%" stopColor="#c8a84b" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <Area
-                        type="monotone"
-                        dataKey="revenue"
-                        stroke="#f0c94a"
-                        strokeWidth={2}
-                        fill="url(#sparkGold)"
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                )}
+                {chart.length > 0 && <RevenueSparkline data={chart} />}
               </div>
             </div>
           </div>
@@ -199,44 +184,7 @@ export default function WholesaleDashboard() {
                   <EmptyState message="No revenue recorded yet. Orders will appear here as they settle." />
                 </div>
               ) : (
-                <ResponsiveContainer width="100%" height={240}>
-                  <AreaChart data={chart} margin={{ left: 8, right: 16, top: 10 }}>
-                    <defs>
-                      <linearGradient id="revArea" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#0d1f4e" stopOpacity={0.18} />
-                        <stop offset="100%" stopColor="#0d1f4e" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis
-                      dataKey="date"
-                      tick={{ fontSize: 11, fill: "#8a8d9b" }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <YAxis
-                      tick={{ fontSize: 11, fill: "#8a8d9b" }}
-                      tickFormatter={(v: number) => `D${v}`}
-                      axisLine={false}
-                      tickLine={false}
-                      width={48}
-                    />
-                    <Tooltip
-                      formatter={(v: number) => formatCurrency(v)}
-                      contentStyle={{
-                        borderRadius: 10,
-                        border: "1px solid #e5e7eb",
-                        fontSize: 12,
-                      }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="revenue"
-                      stroke="#0d1f4e"
-                      strokeWidth={2.5}
-                      fill="url(#revArea)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+                <RevenueArea data={chart} />
               )}
             </div>
           </article>
