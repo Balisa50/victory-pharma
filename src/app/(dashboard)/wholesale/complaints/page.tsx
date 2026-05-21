@@ -6,10 +6,11 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { formatDateTime, COMPLAINT_TYPE_LABELS } from "@/lib/utils";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { TableRowSkeleton } from "@/components/shared/LoadingSkeleton";
+import { PageHeader, PageBody, Panel } from "@/components/shared/Editorial";
 import type { Complaint, ComplaintStatus } from "@/types";
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json()).then((d) => d.data);
+const fetcher = (url: string) =>
+  fetch(url).then((r) => r.json()).then((d) => d.data);
 
 type ComplaintRow = Complaint & {
   retailPharmacy: { name: string; pharmacyName: string | null };
@@ -17,9 +18,9 @@ type ComplaintRow = Complaint & {
 };
 
 const STATUS_COLORS: Record<ComplaintStatus, string> = {
-  pending: "bg-yellow-100 text-yellow-700",
-  in_review: "bg-blue-100 text-blue-700",
-  resolved: "bg-green-100 text-green-700",
+  pending: "bg-[hsl(var(--gold))]/15 text-[hsl(var(--gold))]",
+  in_review: "bg-[hsl(var(--navy-3))]/12 text-[hsl(var(--navy-3))]",
+  resolved: "bg-[hsl(var(--green))]/12 text-[hsl(var(--green))]",
 };
 
 export default function WholesaleComplaintsPage() {
@@ -53,92 +54,122 @@ export default function WholesaleComplaintsPage() {
   }
 
   return (
-    <div className="p-6">
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Complaints</h1>
+    <>
+      <PageHeader
+        eyebrow="Issue tracker"
+        title="Partner"
+        accent="complaints"
+        description="Review and resolve issues raised by retail partners on their orders."
+      />
 
-      <div className="mb-4 flex flex-wrap gap-2">
-        {(["", "pending", "in_review", "resolved"] as const).map((s) => (
-          <button
-            key={s}
-            onClick={() => setStatusFilter(s)}
-            className={`rounded-full px-3 py-1 text-xs font-medium ${
-              statusFilter === s
-                ? "bg-emerald-600 text-white"
-                : "border border-gray-200 text-gray-600 hover:bg-gray-50"
-            }`}
-          >
-            {s === "" ? "All" : s.replace("_", " ")}
-          </button>
-        ))}
-      </div>
+      <PageBody>
+        {/* Filter */}
+        <div className="flex flex-wrap gap-2">
+          {(["", "pending", "in_review", "resolved"] as const).map((s) => (
+            <button
+              key={s}
+              onClick={() => setStatusFilter(s)}
+              className={`rounded-full px-3.5 py-1.5 text-[11.5px] font-semibold uppercase tracking-[0.1em] transition-colors ${
+                statusFilter === s
+                  ? "bg-[hsl(var(--navy))] text-white"
+                  : "border border-neutral-200 bg-white text-neutral-500 hover:bg-[hsl(var(--offwhite))]"
+              }`}
+            >
+              {s === "" ? "All" : s.replace("_", " ")}
+            </button>
+          ))}
+        </div>
 
-      <div className="rounded-xl border border-gray-100 bg-white shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 text-left text-xs font-medium uppercase text-gray-400">
-                <th className="px-4 py-3">Pharmacy</th>
-                <th className="px-4 py-3">Order</th>
-                <th className="px-4 py-3">Type</th>
-                <th className="px-4 py-3">Description</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Date</th>
-                <th className="px-4 py-3">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                Array.from({ length: 5 }).map((_, i) => <TableRowSkeleton key={i} cols={7} />)
-              ) : (data?.length ?? 0) === 0 ? (
-                <tr><td colSpan={7}><EmptyState message="No complaints found" /></td></tr>
-              ) : (
-                data!.map((c) => (
-                  <tr key={c.id} className="border-b border-gray-50 hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium text-gray-900">
-                      {c.retailPharmacy.pharmacyName ?? c.retailPharmacy.name}
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs text-gray-500">#{c.orderId.slice(-8)}</td>
-                    <td className="px-4 py-3 text-gray-600">{COMPLAINT_TYPE_LABELS[c.type]}</td>
-                    <td className="max-w-xs px-4 py-3">
-                      <p className="truncate text-gray-600">{c.description}</p>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[c.status]}`}>
-                        {c.status.replace("_", " ")}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-gray-500">{formatDateTime(c.createdAt)}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-1">
-                        {c.status === "pending" && (
-                          <button
-                            onClick={() => updateStatus(c.id, "in_review")}
-                            disabled={updatingId === c.id}
-                            className="flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 disabled:opacity-50"
-                          >
-                            {updatingId === c.id && <Loader2 className="h-3 w-3 animate-spin" />}
-                            Review
-                          </button>
-                        )}
-                        {c.status !== "resolved" && (
-                          <button
-                            onClick={() => updateStatus(c.id, "resolved")}
-                            disabled={updatingId === c.id}
-                            className="flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-green-600 hover:bg-green-50 disabled:opacity-50"
-                          >
-                            {updatingId === c.id && <Loader2 className="h-3 w-3 animate-spin" />}
-                            Resolve
-                          </button>
-                        )}
-                      </div>
+        <Panel>
+          <div className="overflow-x-auto">
+            <table className="w-full text-[13.5px]">
+              <thead>
+                <tr className="ed-thead">
+                  <th className="px-6 py-3.5 md:px-7">Pharmacy</th>
+                  <th className="px-4 py-3.5">Order</th>
+                  <th className="px-4 py-3.5">Type</th>
+                  <th className="px-4 py-3.5">Description</th>
+                  <th className="px-4 py-3.5">Status</th>
+                  <th className="px-4 py-3.5">Date</th>
+                  <th className="px-6 py-3.5 text-right md:px-7">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {isLoading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i} className="border-b border-neutral-100">
+                      <td colSpan={7} className="h-14 animate-pulse bg-neutral-50/60" />
+                    </tr>
+                  ))
+                ) : (data?.length ?? 0) === 0 ? (
+                  <tr>
+                    <td colSpan={7}>
+                      <EmptyState message="No complaints to show. A quiet queue is a good queue." />
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+                ) : (
+                  data!.map((c) => (
+                    <tr key={c.id} className="ed-row align-top">
+                      <td className="px-6 py-4 md:px-7">
+                        <span className="serif italic text-[hsl(var(--navy))]">
+                          {c.retailPharmacy.pharmacyName ?? c.retailPharmacy.name}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 font-mono text-[11.5px] tracking-wide text-neutral-400">
+                        #{c.orderId.slice(-8).toUpperCase()}
+                      </td>
+                      <td className="px-4 py-4 text-neutral-600">
+                        {COMPLAINT_TYPE_LABELS[c.type]}
+                      </td>
+                      <td className="max-w-xs px-4 py-4">
+                        <p className="truncate text-neutral-600">{c.description}</p>
+                      </td>
+                      <td className="px-4 py-4">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${STATUS_COLORS[c.status]}`}
+                        >
+                          {c.status.replace("_", " ")}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-[12px] text-neutral-400">
+                        {formatDateTime(c.createdAt)}
+                      </td>
+                      <td className="px-6 py-4 md:px-7">
+                        <div className="flex justify-end gap-1.5">
+                          {c.status === "pending" && (
+                            <button
+                              onClick={() => updateStatus(c.id, "in_review")}
+                              disabled={updatingId === c.id}
+                              className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[11.5px] font-semibold text-[hsl(var(--navy-3))] transition-colors hover:bg-[hsl(var(--navy-3))]/10 disabled:opacity-50"
+                            >
+                              {updatingId === c.id && (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              )}
+                              Review
+                            </button>
+                          )}
+                          {c.status !== "resolved" && (
+                            <button
+                              onClick={() => updateStatus(c.id, "resolved")}
+                              disabled={updatingId === c.id}
+                              className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[11.5px] font-semibold text-[hsl(var(--green))] transition-colors hover:bg-[hsl(var(--green))]/10 disabled:opacity-50"
+                            >
+                              {updatingId === c.id && (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              )}
+                              Resolve
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </Panel>
+      </PageBody>
+    </>
   );
 }

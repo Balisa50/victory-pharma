@@ -95,4 +95,39 @@
     @apply rounded-2xl bg-white p-7 shadow-[0_2px_12px_rgba(0,0,0,0.06)];
     border-top: 4px solid hsl(var(--navy-3));
   }
+
+  /* Shared buttons */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-[13px] font-semibold tracking-wide transition-all disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-red {
+    background: hsl(var(--red));
+    @apply text-white;
+  }
+  .btn-red:hover:not(:disabled) {
+    background: hsl(var(--red) / 0.88);
+    transform: translateY(-1px);
+  }
+  .btn-navy {
+    background: hsl(var(--navy));
+    @apply text-white;
+  }
+  .btn-navy:hover:not(:disabled) {
+    background: hsl(var(--navy-2));
+    transform: translateY(-1px);
+  }
+  .btn-ghost {
+    @apply border border-neutral-200 text-[hsl(var(--navy))];
+  }
+  .btn-ghost:hover:not(:disabled) {
+    background: hsl(var(--offwhite));
+  }
+
+  /* Editorial table primitives */
+  .ed-thead {
+    @apply border-b border-neutral-100 text-left text-[10.5px] font-semibold uppercase tracking-[0.16em] text-neutral-400;
+  }
+  .ed-row {
+    @apply border-b border-neutral-100 transition-colors hover:bg-[hsl(var(--offwhite))];
+  }
 }

@@ -7,12 +7,19 @@ import { Search, ChevronLeft, ChevronRight, ShoppingCart } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Skeleton } from "@/components/shared/LoadingSkeleton";
+import { PageHeader, PageBody } from "@/components/shared/Editorial";
 import { useCartActions } from "@/contexts/CartContext";
 import type { Product } from "@/types";
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json()).then((d) => d.data);
+const fetcher = (url: string) =>
+  fetch(url).then((r) => r.json()).then((d) => d.data);
 
-type CatalogData = { products: Product[]; total: number; pages: number; categories: string[] };
+type CatalogData = {
+  products: Product[];
+  total: number;
+  pages: number;
+  categories: string[];
+};
 
 function useDebounce(value: string, ms = 350) {
   const [debounced, setDebounced] = useState(value);
@@ -54,115 +61,159 @@ export default function CatalogPage() {
     toast.success(`${product.name} added to cart`);
   }
 
+  const fieldClass =
+    "rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] transition-colors focus:border-[hsl(var(--gold))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/20";
+
   return (
-    <div className="p-6">
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Catalog</h1>
+    <>
+      <PageHeader
+        eyebrow="Wholesale catalog"
+        title="Browse the"
+        accent="shelves"
+        description="Search by brand or generic, filter by category, and add to your cart in seconds."
+      />
 
-      {/* Filters */}
-      <div className="mb-6 flex flex-wrap gap-3">
-        <div className="relative min-w-48 flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          <input
-            value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            placeholder="Search products..."
-            className="w-full rounded-lg border border-gray-200 py-2 pl-9 pr-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
+      <PageBody>
+        {/* Filters */}
+        <div className="flex flex-wrap gap-3">
+          <div className="relative min-w-[12rem] flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+            <input
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              placeholder="Search products..."
+              className={`${fieldClass} w-full pl-9`}
+            />
+          </div>
+
+          <select
+            value={category}
+            onChange={(e) => {
+              setCategory(e.target.value);
+              setPage(1);
+            }}
+            className={fieldClass}
+          >
+            <option value="">All categories</option>
+            {data?.categories.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+            className={fieldClass}
+          >
+            <option value="name_asc">Name A-Z</option>
+            <option value="price_asc">Price: Low to high</option>
+            <option value="price_desc">Price: High to low</option>
+          </select>
+
+          <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] text-[hsl(var(--navy))]">
+            <input
+              type="checkbox"
+              checked={inStock}
+              onChange={(e) => {
+                setInStock(e.target.checked);
+                setPage(1);
+              }}
+              className="h-4 w-4 rounded border-neutral-300 accent-[hsl(var(--red))]"
+            />
+            In stock only
+          </label>
         </div>
 
-        <select
-          value={category}
-          onChange={(e) => { setCategory(e.target.value); setPage(1); }}
-          className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-        >
-          <option value="">All categories</option>
-          {data?.categories.map((c) => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </select>
-
-        <select
-          value={sort}
-          onChange={(e) => setSort(e.target.value)}
-          className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-        >
-          <option value="name_asc">Name A-Z</option>
-          <option value="price_asc">Price: Low to high</option>
-          <option value="price_desc">Price: High to low</option>
-        </select>
-
-        <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm">
-          <input
-            type="checkbox"
-            checked={inStock}
-            onChange={(e) => { setInStock(e.target.checked); setPage(1); }}
-            className="h-4 w-4 rounded border-gray-300 text-blue-600"
-          />
-          In stock only
-        </label>
-      </div>
-
-      {/* Grid */}
-      {isLoading ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {Array.from({ length: 12 }).map((_, i) => (
-            <div key={i} className="rounded-xl border border-gray-100 bg-white p-4">
-              <Skeleton className="mb-3 h-5 w-3/4" />
-              <Skeleton className="mb-2 h-4 w-1/2" />
-              <Skeleton className="h-4 w-1/4" />
-            </div>
-          ))}
-        </div>
-      ) : (data?.products?.length ?? 0) === 0 ? (
-        <EmptyState message="No products match your search" />
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {data!.products.map((p) => (
-            <div key={p.id} className="flex flex-col rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-              <div className="mb-2 text-xs font-medium uppercase text-blue-600">{p.category}</div>
-              <h3 className="mb-1 flex-1 font-semibold text-gray-900">{p.name}</h3>
-              <p className="mb-3 text-lg font-bold text-gray-900">{formatCurrency(Number(p.price))}</p>
-              <div className="mb-3 flex items-center justify-between text-xs text-gray-500">
-                <span>{p.stockQuantity > 0 ? `${p.stockQuantity} in stock` : "Out of stock"}</span>
-                {p.stockQuantity < 10 && p.stockQuantity > 0 && (
-                  <span className="text-orange-600">Low stock</span>
-                )}
-              </div>
-              <button
-                onClick={() => handleAddToCart(p)}
-                disabled={p.stockQuantity === 0}
-                className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+        {/* Grid */}
+        {isLoading ? (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <div
+                key={i}
+                className="rounded-2xl bg-white p-5 ring-1 ring-[hsl(var(--navy))]/5"
               >
-                <ShoppingCart className="h-4 w-4" />
-                Add to cart
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+                <Skeleton className="mb-3 h-4 w-1/3" />
+                <Skeleton className="mb-2 h-5 w-3/4" />
+                <Skeleton className="h-6 w-1/3" />
+              </div>
+            ))}
+          </div>
+        ) : (data?.products?.length ?? 0) === 0 ? (
+          <div className="rounded-2xl bg-white ring-1 ring-[hsl(var(--navy))]/5">
+            <EmptyState message="No products match your search. Try a different term or clear the filters." />
+          </div>
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {data!.products.map((p) => {
+              const out = p.stockQuantity === 0;
+              const low = p.stockQuantity > 0 && p.stockQuantity < 10;
+              return (
+                <article
+                  key={p.id}
+                  className="flex flex-col rounded-2xl bg-white p-5 ring-1 ring-[hsl(var(--navy))]/5 transition-shadow hover:shadow-[0_8px_30px_rgba(13,31,78,0.08)]"
+                >
+                  <p className="eyebrow mb-2 text-[hsl(var(--red-2))]">{p.category}</p>
+                  <h3 className="serif mb-3 flex-1 text-[17px] leading-snug text-[hsl(var(--navy))]">
+                    {p.name}
+                  </h3>
+                  <p
+                    className="display mb-3 text-[hsl(var(--navy))]"
+                    style={{ fontSize: "26px" }}
+                  >
+                    {formatCurrency(Number(p.price))}
+                  </p>
+                  <div className="mb-4 flex items-center justify-between text-[12px]">
+                    <span className={out ? "text-neutral-400" : "text-neutral-500"}>
+                      {out ? "Out of stock" : `${p.stockQuantity} in stock`}
+                    </span>
+                    {low && (
+                      <span className="font-semibold uppercase tracking-wide text-[hsl(var(--red-2))]">
+                        Low stock
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => handleAddToCart(p)}
+                    disabled={out}
+                    className="btn btn-red w-full"
+                  >
+                    <ShoppingCart className="h-4 w-4" />
+                    Add to cart
+                  </button>
+                </article>
+              );
+            })}
+          </div>
+        )}
 
-      {/* Pagination */}
-      {(data?.pages ?? 0) > 1 && (
-        <div className="mt-6 flex items-center justify-center gap-2">
-          <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="rounded-lg border p-2 disabled:opacity-40"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          <span className="text-sm text-gray-600">
-            Page {page} of {data?.pages}
-          </span>
-          <button
-            onClick={() => setPage((p) => Math.min(data?.pages ?? 1, p + 1))}
-            disabled={page === data?.pages}
-            className="rounded-lg border p-2 disabled:opacity-40"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
-      )}
-    </div>
+        {/* Pagination */}
+        {(data?.pages ?? 0) > 1 && (
+          <div className="flex items-center justify-center gap-3 pt-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="grid h-9 w-9 place-items-center rounded-lg border border-neutral-200 bg-white text-[hsl(var(--navy))] transition-colors hover:bg-[hsl(var(--offwhite))] disabled:opacity-40"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <span className="text-[12px] font-medium uppercase tracking-[0.14em] text-neutral-500">
+              Page {page} of {data?.pages}
+            </span>
+            <button
+              onClick={() => setPage((p) => Math.min(data?.pages ?? 1, p + 1))}
+              disabled={page === data?.pages}
+              className="grid h-9 w-9 place-items-center rounded-lg border border-neutral-200 bg-white text-[hsl(var(--navy))] transition-colors hover:bg-[hsl(var(--offwhite))] disabled:opacity-40"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+      </PageBody>
+    </>
   );
 }

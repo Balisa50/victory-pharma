@@ -1,4 +1,4 @@
-import { CheckCircle2, Circle } from "lucide-react";
+import { Check } from "lucide-react";
 import { formatDateTime, ORDER_STATUS_LABELS } from "@/lib/utils";
 import type { OrderStatusHistory, OrderStatus } from "@/types";
 
@@ -16,31 +16,44 @@ export function OrderTimeline({ history }: { history: OrderStatusHistory[] }) {
 
   if (isCancelled) {
     return (
-      <div className="rounded-lg border border-red-100 bg-red-50 p-4 text-sm text-red-700">
+      <div className="rounded-lg border border-[hsl(var(--red))]/20 bg-[hsl(var(--red))]/5 p-4 text-[13px] leading-relaxed text-[hsl(var(--red-2))]">
         This order was cancelled on{" "}
-        {formatDateTime(history.find((h) => h.status === "cancelled")!.changedAt)}
+        {formatDateTime(history.find((h) => h.status === "cancelled")!.changedAt)}.
       </div>
     );
   }
 
   return (
-    <ol className="relative border-l border-gray-200">
+    <ol className="relative ml-1 border-l border-neutral-200">
       {STATUS_ORDER.map((status) => {
         const entry = historyMap.get(status);
+        const done = Boolean(entry);
         return (
-          <li key={status} className="mb-6 ml-6">
+          <li key={status} className="mb-6 ml-6 last:mb-0">
             <span
-              className={`absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full ring-4 ring-white ${
-                entry ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-400"
+              className={`absolute -left-[13px] flex h-6 w-6 items-center justify-center rounded-full ring-4 ring-white ${
+                done
+                  ? "bg-[hsl(var(--navy))] text-[hsl(var(--gold))]"
+                  : "bg-neutral-100 text-neutral-300"
               }`}
             >
-              {entry ? <CheckCircle2 className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
+              {done ? (
+                <Check className="h-3.5 w-3.5" strokeWidth={3} />
+              ) : (
+                <span className="h-1.5 w-1.5 rounded-full bg-current" />
+              )}
             </span>
-            <p className={`text-sm font-medium ${entry ? "text-gray-900" : "text-gray-400"}`}>
+            <p
+              className={`text-[13.5px] font-medium ${
+                done ? "text-[hsl(var(--navy))]" : "text-neutral-400"
+              }`}
+            >
               {ORDER_STATUS_LABELS[status]}
             </p>
             {entry && (
-              <p className="text-xs text-gray-500">{formatDateTime(entry.changedAt)}</p>
+              <p className="mt-0.5 text-[11.5px] text-neutral-400">
+                {formatDateTime(entry.changedAt)}
+              </p>
             )}
           </li>
         );

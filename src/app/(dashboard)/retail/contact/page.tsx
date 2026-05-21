@@ -1,42 +1,55 @@
 import { Phone, MessageCircle } from "lucide-react";
+import { PageHeader, PageBody } from "@/components/shared/Editorial";
 
 export default function RetailContactPage() {
   const phone = process.env.CONTACT_PHONE ?? "+220 000 0000";
   const whatsapp = process.env.WHATSAPP_LINK ?? "https://wa.me/2200000000";
-  const msg = encodeURIComponent("Hello, I need assistance with my order on Victory Pharmaceutical.");
+  const msg = encodeURIComponent(
+    "Hello, I need assistance with my order on Victory Pharmaceutical."
+  );
 
   return (
-    <div className="p-6">
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Contact Support</h1>
-      <div className="max-w-md rounded-xl border border-gray-100 bg-white p-8 shadow-sm">
-        <p className="mb-6 text-sm text-gray-500">
-          Need help? Reach our support team via phone or WhatsApp.
-        </p>
-        <div className="space-y-4">
+    <>
+      <PageHeader
+        eyebrow="Support"
+        title="We are"
+        accent="here to help"
+        description="Reach a real person on the Victory team, eight in the morning to eight at night, every day."
+      />
+
+      <PageBody>
+        <div className="grid max-w-2xl gap-4 sm:grid-cols-2">
           <a
             href={`tel:${phone}`}
-            className="flex items-center gap-4 rounded-lg border border-gray-200 p-4 hover:bg-gray-50"
+            className="group rounded-2xl bg-white p-7 ring-1 ring-[hsl(var(--navy))]/5 transition-shadow hover:shadow-[0_8px_30px_rgba(13,31,78,0.08)]"
           >
-            <Phone className="h-5 w-5 text-blue-600" />
-            <div>
-              <p className="text-xs text-gray-400">Phone</p>
-              <p className="font-medium text-gray-900">{phone}</p>
+            <div className="mb-4 grid h-11 w-11 place-items-center rounded-full bg-[hsl(var(--navy))]">
+              <Phone className="h-4 w-4 text-[hsl(var(--gold))]" />
             </div>
+            <p className="eyebrow mb-1 text-[hsl(var(--red-2))]">Call us</p>
+            <p className="serif text-[18px] text-[hsl(var(--navy))]">{phone}</p>
+            <p className="mt-2 text-[12.5px] font-light text-neutral-500">
+              Tap to dial from your phone.
+            </p>
           </a>
+
           <a
             href={`${whatsapp}?text=${msg}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-4 rounded-lg border border-gray-200 p-4 hover:bg-gray-50"
+            className="group rounded-2xl bg-white p-7 ring-1 ring-[hsl(var(--navy))]/5 transition-shadow hover:shadow-[0_8px_30px_rgba(13,31,78,0.08)]"
           >
-            <MessageCircle className="h-5 w-5 text-green-600" />
-            <div>
-              <p className="text-xs text-gray-400">WhatsApp</p>
-              <p className="font-medium text-gray-900">Chat with us</p>
+            <div className="mb-4 grid h-11 w-11 place-items-center rounded-full bg-[hsl(var(--green))]">
+              <MessageCircle className="h-4 w-4 text-white" />
             </div>
+            <p className="eyebrow mb-1 text-[hsl(var(--red-2))]">WhatsApp</p>
+            <p className="serif text-[18px] text-[hsl(var(--navy))]">Chat with us</p>
+            <p className="mt-2 text-[12.5px] font-light text-neutral-500">
+              Opens a conversation with your order pre-filled.
+            </p>
           </a>
         </div>
-      </div>
-    </div>
+      </PageBody>
+    </>
   );
 }
