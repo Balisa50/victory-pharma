@@ -26,6 +26,7 @@ export function ProductModal({ product, onClose, onSaved }: Props) {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const isEdit = Boolean(product);
 
   const {
     register,
@@ -41,20 +42,45 @@ export function ProductModal({ product, onClose, onSaved }: Props) {
           name: product.name,
           category: product.category,
           price: Number(product.price),
-          stockQuantity: product.stockQuantity,
           expiryDate: product.expiryDate
             ? new Date(product.expiryDate).toISOString().split("T")[0]
             : undefined,
           availabilityStatus: product.availabilityStatus,
           imageUrl: product.imageUrl ?? null,
+          unitsPerBottle: product.unitsPerBottle,
+          bottlesPerCarton: product.bottlesPerCarton,
+          stockUnits: product.stockUnits,
+          lowStockThreshold: product.lowStockThreshold,
+          allowBottleSale: product.allowBottleSale,
+          allowCartonSale: product.allowCartonSale,
         }
-      : { availabilityStatus: true, imageUrl: null },
+      : {
+          availabilityStatus: true,
+          imageUrl: null,
+          unitsPerBottle: 1,
+          bottlesPerCarton: 1,
+          stockUnits: 0,
+          lowStockThreshold: 10,
+          allowBottleSale: true,
+          allowCartonSale: false,
+        },
   });
 
   const imageUrl = watch("imageUrl");
 
   useEffect(() => {
-    if (!product) reset({ availabilityStatus: true, imageUrl: null });
+    if (!product) {
+      reset({
+        availabilityStatus: true,
+        imageUrl: null,
+        unitsPerBottle: 1,
+        bottlesPerCarton: 1,
+        stockUnits: 0,
+        lowStockThreshold: 10,
+        allowBottleSale: true,
+        allowCartonSale: false,
+      });
+    }
   }, [product, reset]);
 
   async function handleFile(file: File) {
@@ -94,10 +120,14 @@ export function ProductModal({ product, onClose, onSaved }: Props) {
     try {
       const url = product ? `/api/products/${product.id}` : "/api/products";
       const method = product ? "PATCH" : "POST";
+      // Stock for existing products is changed in the Warehouse, not here.
+      const payload = { ...data, imageUrl: data.imageUrl || null };
+      if (isEdit) delete (payload as Partial<CreateProductInput>).stockUnits;
+
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, imageUrl: data.imageUrl || null }),
+        body: JSON.stringify(payload),
       });
       const json = (await res.json()) as { success: boolean; error?: string };
       if (json.success) {
@@ -117,11 +147,11 @@ export function ProductModal({ product, onClose, onSaved }: Props) {
       title={product ? "Edit" : "Add a"}
       accent="product"
       onClose={onClose}
-      maxWidth="max-w-md"
+      maxWidth="max-w-lg"
     >
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="max-h-[70vh] space-y-3.5 overflow-y-auto px-6 py-5"
+        className="max-h-[74vh] space-y-3.5 overflow-y-auto px-6 py-5"
       >
         <Field label="Name" error={errors.name?.message}>
           <input
@@ -139,20 +169,82 @@ export function ProductModal({ product, onClose, onSaved }: Props) {
           />
         </Field>
 
+        <Field label="Unit price (GMD)" error={errors.price?.message}>
+          <input
+            {...register("price", { valueAsNumber: true })}
+            type="number"
+            step="0.01"
+            min="0.01"
+            className="field"
+            placeholder="Price of one base unit"
+          />
+        </Field>
+
+        {/* Packaging conversions */}
+        <div className="rounded-lg bg-[hsl(var(--offwhite))] p-3.5">
+          <p className="eyebrow mb-3 text-[hsl(var(--red-2))]">Packaging</p>
+          <div className="grid grid-cols-2 gap-3.5">
+            <Field label="Units per bottle" error={errors.unitsPerBottle?.message}>
+              <input
+                {...register("unitsPerBottle", { valueAsNumber: true })}
+                type="number"
+                min="1"
+                className="field bg-white"
+              />
+            </Field>
+            <Field
+              label="Bottles per carton"
+              error={errors.bottlesPerCarton?.message}
+            >
+              <input
+                {...register("bottlesPerCarton", { valueAsNumber: true })}
+                type="number"
+                min="1"
+                className="field bg-white"
+              />
+            </Field>
+          </div>
+          <div className="mt-3 flex flex-col gap-2">
+            <label className="flex cursor-pointer items-center gap-2.5">
+              <input
+                {...register("allowBottleSale")}
+                type="checkbox"
+                className="h-4 w-4 rounded border-neutral-300 accent-[hsl(var(--red))]"
+              />
+              <span className="text-[12.5px] text-[hsl(var(--navy))]">
+                Allow selling by the bottle
+              </span>
+            </label>
+            <label className="flex cursor-pointer items-center gap-2.5">
+              <input
+                {...register("allowCartonSale")}
+                type="checkbox"
+                className="h-4 w-4 rounded border-neutral-300 accent-[hsl(var(--red))]"
+              />
+              <span className="text-[12.5px] text-[hsl(var(--navy))]">
+                Allow selling by the carton
+              </span>
+            </label>
+          </div>
+        </div>
+
         <div className="grid grid-cols-2 gap-3.5">
-          <Field label="Price (GMD)" error={errors.price?.message}>
+          {!isEdit && (
+            <Field label="Initial stock (units)" error={errors.stockUnits?.message}>
+              <input
+                {...register("stockUnits", { valueAsNumber: true })}
+                type="number"
+                min="0"
+                className="field"
+              />
+            </Field>
+          )}
+          <Field
+            label="Low stock alert (units)"
+            error={errors.lowStockThreshold?.message}
+          >
             <input
-              {...register("price", { valueAsNumber: true })}
-              type="number"
-              step="0.01"
-              min="0.01"
-              className="field"
-              placeholder="0.00"
-            />
-          </Field>
-          <Field label="Stock quantity" error={errors.stockQuantity?.message}>
-            <input
-              {...register("stockQuantity", { valueAsNumber: true })}
+              {...register("lowStockThreshold", { valueAsNumber: true })}
               type="number"
               min="0"
               className="field"

@@ -37,19 +37,23 @@ export type {
 export type CartItem = {
   productId: string;
   name: string;
-  price: number;
-  quantity: number;
-  stock: number;
+  packLevel: import("@/lib/packaging").PackLevel;
+  unitsPerPack: number; // base units in one pack of this level
+  pricePerPack: number; // price for one pack
+  quantity: number; // number of packs
+  maxPacks: number; // packs the current stock can fulfil
 };
 
 export type CartState = {
   items: CartItem[];
 };
 
+type CartLineRef = { productId: string; packLevel: import("@/lib/packaging").PackLevel };
+
 export type CartAction =
   | { type: "ADD_ITEM"; payload: CartItem }
-  | { type: "REMOVE_ITEM"; payload: { productId: string } }
-  | { type: "UPDATE_QUANTITY"; payload: { productId: string; quantity: number } }
+  | { type: "REMOVE_ITEM"; payload: CartLineRef }
+  | { type: "UPDATE_QUANTITY"; payload: CartLineRef & { quantity: number } }
   | { type: "CLEAR_CART" };
 
 export type OrderWithRelations = Order & {

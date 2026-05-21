@@ -92,7 +92,6 @@ model Product {
   name               String
   category           String
   price              Decimal  @db.Decimal(12, 2)
-  stockQuantity      Int      @default(0)
   expiryDate         DateTime?
   availabilityStatus Boolean  @default(true)
   imageUrl           String?
@@ -100,12 +99,44 @@ model Product {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
-  orderItems OrderItem[]
+  // Multi-level packaging. Stock is tracked in base units (the smallest
+  // sellable item); bottles and cartons are derived via conversion rates.
+  // price is the per-base-unit price; bottle/carton prices are multiples.
+  unitsPerBottle    Int     @default(1)
+  bottlesPerCarton  Int     @default(1)
+  stockUnits        Int     @default(0)
+  lowStockThreshold Int     @default(10)
+  allowBottleSale   Boolean @default(true)
+  allowCartonSale   Boolean @default(false)
+
+  orderItems     OrderItem[]
+  stockMovements StockMovement[]
 
   @@index([name])
   @@index([category])
   @@index([availabilityStatus])
   @@map("products")
+}
+
+model StockMovement {
+  id         String          @id @default(cuid())
+  productId  String
+  product    Product         @relation(fields: [productId], references: [id])
+  actionType StockActionType
+  quantity   Int             // signed change in base units
+  note       String?
+  adminId    String?
+  createdAt  DateTime        @default(now())
+
+  @@index([productId])
+  @@index([createdAt])
+  @@map("stock_movements")
+}
+
+enum StockActionType {
+  STOCK_ADD
+  ORDER_DEDUCTION
+  MANUAL_ADJUST
 }
 
 model Order {
@@ -131,13 +162,15 @@ model Order {
 }
 
 model OrderItem {
-  id         String  @id @default(cuid())
-  orderId    String
-  productId  String
+  id          String  @id @default(cuid())
+  orderId     String
+  productId   String
   productName String
-  quantity   Int
-  unitPrice  Decimal @db.Decimal(12, 2)
-  subtotal   Decimal @db.Decimal(12, 2)
+  packLevel   String  @default("unit") // unit | bottle | carton
+  unitsPerPack Int    @default(1)      // base units per pack of this level
+  quantity    Int                       // number of packs ordered
+  unitPrice   Decimal @db.Decimal(12, 2) // price per pack
+  subtotal    Decimal @db.Decimal(12, 2)
 
   order      Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product    Product @relation(fields: [productId], references: [id])

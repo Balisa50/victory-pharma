@@ -6,6 +6,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { Minus, Plus, Trash2, ShoppingBag, Loader2 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { PACK_LABELS } from "@/lib/packaging";
 import { useCart, useCartActions } from "@/contexts/CartContext";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { PageHeader, PageBody } from "@/components/shared/Editorial";
@@ -26,6 +27,7 @@ export default function CartPage() {
         body: JSON.stringify({
           items: state.items.map((i) => ({
             productId: i.productId,
+            packLevel: i.packLevel,
             quantity: i.quantity,
           })),
         }),
@@ -71,7 +73,7 @@ export default function CartPage() {
         eyebrow="Your cart"
         title="Review &"
         accent="check out"
-        description={`${state.items.length} product${
+        description={`${state.items.length} line${
           state.items.length !== 1 ? "s" : ""
         } ready to order.`}
       />
@@ -81,7 +83,7 @@ export default function CartPage() {
           <div className="space-y-3 lg:col-span-2">
             {state.items.map((item) => (
               <div
-                key={item.productId}
+                key={`${item.productId}:${item.packLevel}`}
                 className="flex items-center gap-4 rounded-2xl bg-white p-4 ring-1 ring-[hsl(var(--navy))]/5 md:p-5"
               >
                 <div className="min-w-0 flex-1">
@@ -89,15 +91,24 @@ export default function CartPage() {
                     {item.name}
                   </p>
                   <p className="mt-0.5 text-[12.5px] text-neutral-500">
-                    {formatCurrency(item.price)} each
+                    {formatCurrency(item.pricePerPack)} per{" "}
+                    {PACK_LABELS[item.packLevel].toLowerCase()}
                   </p>
                   <p className="text-[11px] uppercase tracking-[0.12em] text-neutral-400">
-                    {item.stock} available
+                    {PACK_LABELS[item.packLevel]}
+                    {item.packLevel !== "unit" &&
+                      ` · ${item.unitsPerPack} units each`}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                    onClick={() =>
+                      updateQuantity(
+                        item.productId,
+                        item.packLevel,
+                        item.quantity - 1
+                      )
+                    }
                     className="grid h-8 w-8 place-items-center rounded-lg border border-neutral-200 text-[hsl(var(--navy))] transition-colors hover:bg-[hsl(var(--offwhite))]"
                   >
                     <Minus className="h-3 w-3" />
@@ -106,18 +117,24 @@ export default function CartPage() {
                     {item.quantity}
                   </span>
                   <button
-                    onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                    disabled={item.quantity >= item.stock}
+                    onClick={() =>
+                      updateQuantity(
+                        item.productId,
+                        item.packLevel,
+                        item.quantity + 1
+                      )
+                    }
+                    disabled={item.quantity >= item.maxPacks}
                     className="grid h-8 w-8 place-items-center rounded-lg border border-neutral-200 text-[hsl(var(--navy))] transition-colors hover:bg-[hsl(var(--offwhite))] disabled:opacity-40"
                   >
                     <Plus className="h-3 w-3" />
                   </button>
                 </div>
                 <p className="w-24 text-right font-semibold text-[hsl(var(--navy))]">
-                  {formatCurrency(item.price * item.quantity)}
+                  {formatCurrency(item.pricePerPack * item.quantity)}
                 </p>
                 <button
-                  onClick={() => removeItem(item.productId)}
+                  onClick={() => removeItem(item.productId, item.packLevel)}
                   className="rounded-md p-1.5 text-neutral-400 transition-colors hover:bg-[hsl(var(--red))]/10 hover:text-[hsl(var(--red))]"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -137,14 +154,15 @@ export default function CartPage() {
               <div className="space-y-2 border-b border-neutral-100 pb-4">
                 {state.items.map((item) => (
                   <div
-                    key={item.productId}
+                    key={`${item.productId}:${item.packLevel}`}
                     className="flex justify-between text-[13px] text-neutral-600"
                   >
                     <span className="truncate pr-2">
-                      {item.name} x {item.quantity}
+                      {item.name} · {PACK_LABELS[item.packLevel]} x{" "}
+                      {item.quantity}
                     </span>
                     <span className="shrink-0">
-                      {formatCurrency(item.price * item.quantity)}
+                      {formatCurrency(item.pricePerPack * item.quantity)}
                     </span>
                   </div>
                 ))}

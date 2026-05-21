@@ -221,7 +221,7 @@ export default function WholesaleDashboard() {
                       </p>
                     </div>
                     <span className="serif text-[20px] italic text-[hsl(var(--red-2))]">
-                      {p.stockQuantity}
+                      {p.stockUnits}
                     </span>
                   </li>
                 ))

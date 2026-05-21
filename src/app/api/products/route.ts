@@ -17,12 +17,15 @@ export async function GET(req: NextRequest) {
   const inStock = searchParams.get("inStock") === "true";
   const sort = searchParams.get("sort") ?? "name_asc";
   const page = Math.max(1, Number(searchParams.get("page") ?? "1"));
-  const adminView = searchParams.get("adminView") === "true";
+  // adminView (shows unavailable products) is honoured for admins only.
+  const adminView =
+    searchParams.get("adminView") === "true" &&
+    session.user.role === "wholesale_admin";
 
   const where = {
     deletedAt: null,
     ...(adminView ? {} : { availabilityStatus: true }),
-    ...(inStock ? { stockQuantity: { gt: 0 } } : {}),
+    ...(inStock ? { stockUnits: { gt: 0 } } : {}),
     ...(search.length >= 2 ? { name: { contains: search, mode: "insensitive" as const } } : {}),
     ...(category ? { category } : {}),
   };

@@ -179,8 +179,13 @@ export default function WholesaleOrderDetailPage({
                 <tbody>
                   {order.orderItems.map((item) => (
                     <tr key={item.id} className="border-b border-neutral-100">
-                      <td className="px-6 py-3.5 font-medium text-[hsl(var(--navy))] md:px-7">
-                        {item.productName}
+                      <td className="px-6 py-3.5 md:px-7">
+                        <span className="font-medium text-[hsl(var(--navy))]">
+                          {item.productName}
+                        </span>
+                        <span className="ml-2 text-[10.5px] uppercase tracking-[0.12em] text-neutral-400">
+                          {item.packLevel}
+                        </span>
                       </td>
                       <td className="px-4 py-3.5 text-right text-neutral-500">
                         {item.quantity}

@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { LOW_STOCK_THRESHOLD } from "@/lib/utils";
 
 export async function GET() {
   const session = await auth();
@@ -30,7 +29,12 @@ export async function GET() {
       _sum: { totalAmount: true },
     }),
     prisma.order.count(),
-    prisma.product.count({ where: { stockQuantity: { lt: LOW_STOCK_THRESHOLD }, deletedAt: null } }),
+    prisma.product.count({
+      where: {
+        stockUnits: { lte: prisma.product.fields.lowStockThreshold },
+        deletedAt: null,
+      },
+    }),
     prisma.order.findMany({
       take: 10,
       orderBy: { createdAt: "desc" },
@@ -45,8 +49,11 @@ export async function GET() {
       },
     }),
     prisma.product.findMany({
-      where: { stockQuantity: { lt: LOW_STOCK_THRESHOLD }, deletedAt: null },
-      orderBy: { stockQuantity: "asc" },
+      where: {
+        stockUnits: { lte: prisma.product.fields.lowStockThreshold },
+        deletedAt: null,
+      },
+      orderBy: { stockUnits: "asc" },
     }),
     prisma.$queryRaw<{ date: string; revenue: number }[]>`
       SELECT

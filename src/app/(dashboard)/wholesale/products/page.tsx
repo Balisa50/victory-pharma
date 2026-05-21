@@ -85,7 +85,7 @@ export default function ProductsPage() {
                   </tr>
                 ) : (
                   data!.products.map((p) => {
-                    const low = p.stockQuantity < 10;
+                    const low = p.stockUnits <= p.lowStockThreshold;
                     return (
                       <tr key={p.id} className="ed-row">
                         <td className="px-6 py-4 md:px-7">
@@ -124,7 +124,10 @@ export default function ProductsPage() {
                                 : "text-neutral-600"
                             }
                           >
-                            {p.stockQuantity}
+                            {p.stockUnits}
+                          </span>
+                          <span className="ml-1 text-[11px] text-neutral-400">
+                            units
                           </span>
                         </td>
                         <td className="px-4 py-4 text-[12px] text-neutral-400">

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { createOrderSchema } from "@/lib/validation/order";
+import { unitsForPack } from "@/lib/packaging";
 import type { OrderStatus } from "@prisma/client";
 
 export async function GET(req: NextRequest) {
@@ -63,7 +64,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const order = await prisma.$transaction(async (tx) => {
-      const productIds = items.map((i) => i.productId);
+      const productIds = Array.from(new Set(items.map((i) => i.productId)));
       const products = await tx.product.findMany({
         where: { id: { in: productIds }, availabilityStatus: true, deletedAt: null },
       });
@@ -72,17 +73,37 @@ export async function POST(req: NextRequest) {
         throw new Error("One or more products are no longer available");
       }
 
-      for (const item of items) {
+      // Convert every line into base units; total demand per product.
+      const baseUnitsByProduct = new Map<string, number>();
+      const lines = items.map((item) => {
         const product = products.find((p) => p.id === item.productId)!;
-        if (product.stockQuantity < item.quantity) {
+        const unitsPerPack = unitsForPack(product, item.packLevel);
+        const pricePerPack = Number(product.price) * unitsPerPack;
+        const baseUnits = unitsPerPack * item.quantity;
+        baseUnitsByProduct.set(
+          item.productId,
+          (baseUnitsByProduct.get(item.productId) ?? 0) + baseUnits
+        );
+        return {
+          productId: item.productId,
+          productName: product.name,
+          packLevel: item.packLevel,
+          unitsPerPack,
+          quantity: item.quantity,
+          unitPrice: pricePerPack,
+          subtotal: pricePerPack * item.quantity,
+        };
+      });
+
+      // Validate against unified base-unit stock.
+      for (const product of products) {
+        const required = baseUnitsByProduct.get(product.id) ?? 0;
+        if (product.stockUnits < required) {
           throw new Error(`Insufficient stock for ${product.name}`);
         }
       }
 
-      const totalAmount = items.reduce((sum, item) => {
-        const product = products.find((p) => p.id === item.productId)!;
-        return sum + Number(product.price) * item.quantity;
-      }, 0);
+      const totalAmount = lines.reduce((sum, l) => sum + l.subtotal, 0);
 
       const newOrder = await tx.order.create({
         data: {
@@ -90,16 +111,15 @@ export async function POST(req: NextRequest) {
           totalAmount,
           status: "pending",
           orderItems: {
-            create: items.map((item) => {
-              const product = products.find((p) => p.id === item.productId)!;
-              return {
-                productId: item.productId,
-                productName: product.name,
-                quantity: item.quantity,
-                unitPrice: product.price,
-                subtotal: Number(product.price) * item.quantity,
-              };
-            }),
+            create: lines.map((l) => ({
+              productId: l.productId,
+              productName: l.productName,
+              packLevel: l.packLevel,
+              unitsPerPack: l.unitsPerPack,
+              quantity: l.quantity,
+              unitPrice: l.unitPrice,
+              subtotal: l.subtotal,
+            })),
           },
           statusHistory: {
             create: { status: "pending", changedBy: session.user.id },
@@ -108,14 +128,21 @@ export async function POST(req: NextRequest) {
         include: { orderItems: true, statusHistory: true },
       });
 
-      await Promise.all(
-        items.map((item) =>
-          tx.product.update({
-            where: { id: item.productId },
-            data: { stockQuantity: { decrement: item.quantity } },
-          })
-        )
-      );
+      // Deduct base units and log a movement per product.
+      for (const [productId, baseUnits] of Array.from(baseUnitsByProduct.entries())) {
+        await tx.product.update({
+          where: { id: productId },
+          data: { stockUnits: { decrement: baseUnits } },
+        });
+        await tx.stockMovement.create({
+          data: {
+            productId,
+            actionType: "ORDER_DEDUCTION",
+            quantity: -baseUnits,
+            note: `Order ${newOrder.id.slice(-8).toUpperCase()}`,
+          },
+        });
+      }
 
       return newOrder;
     });

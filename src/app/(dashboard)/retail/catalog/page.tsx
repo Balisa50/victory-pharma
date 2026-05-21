@@ -6,6 +6,15 @@ import useSWR from "swr";
 import { toast } from "sonner";
 import { Search, ChevronLeft, ChevronRight, ShoppingCart, Pill } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import {
+  availablePackLevels,
+  unitsForPack,
+  pricePerPack,
+  packsAvailable,
+  formatStockBreakdown,
+  PACK_LABELS,
+  type PackLevel,
+} from "@/lib/packaging";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Skeleton } from "@/components/shared/LoadingSkeleton";
 import { PageHeader, PageBody } from "@/components/shared/Editorial";
@@ -31,6 +40,97 @@ function useDebounce(value: string, ms = 350) {
   return debounced;
 }
 
+function CatalogCard({ product }: { product: Product }) {
+  const { addItem } = useCartActions();
+  const levels = availablePackLevels(product);
+  const [level, setLevel] = useState<PackLevel>(levels[0]);
+
+  const price = pricePerPack({ ...product, price: Number(product.price) }, level);
+  const maxPacks = packsAvailable(product, level);
+  const unitsPerPack = unitsForPack(product, level);
+  const out = maxPacks === 0;
+
+  function handleAdd() {
+    addItem({
+      productId: product.id,
+      name: product.name,
+      packLevel: level,
+      unitsPerPack,
+      pricePerPack: price,
+      quantity: 1,
+      maxPacks,
+    });
+    toast.success(`${product.name} (${PACK_LABELS[level]}) added to cart`);
+  }
+
+  return (
+    <article className="flex flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-[hsl(var(--navy))]/5 transition-shadow hover:shadow-[0_8px_30px_rgba(13,31,78,0.08)]">
+      <div className="relative aspect-[4/3] bg-[hsl(var(--offwhite))]">
+        {product.imageUrl ? (
+          <Image
+            src={product.imageUrl}
+            alt={product.name}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1280px) 33vw, 25vw"
+            className="object-cover"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center">
+            <Pill className="h-8 w-8 text-[hsl(var(--navy))]/15" />
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-1 flex-col p-5">
+        <p className="eyebrow mb-2 text-[hsl(var(--red-2))]">{product.category}</p>
+        <h3 className="serif mb-3 flex-1 text-[17px] leading-snug text-[hsl(var(--navy))]">
+          {product.name}
+        </h3>
+
+        {/* Pack-level selector */}
+        {levels.length > 1 && (
+          <div className="mb-3 flex gap-1 rounded-lg bg-[hsl(var(--offwhite))] p-1">
+            {levels.map((lv) => (
+              <button
+                key={lv}
+                onClick={() => setLevel(lv)}
+                className={`flex-1 rounded-md py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] transition-colors ${
+                  level === lv
+                    ? "bg-[hsl(var(--navy))] text-white"
+                    : "text-neutral-500 hover:text-[hsl(var(--navy))]"
+                }`}
+              >
+                {PACK_LABELS[lv]}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <p className="display text-[hsl(var(--navy))]" style={{ fontSize: "24px" }}>
+          {formatCurrency(price)}
+        </p>
+        <p className="mb-3 text-[11px] text-neutral-400">
+          per {PACK_LABELS[level].toLowerCase()}
+          {level !== "unit" && ` (${unitsPerPack} units)`}
+        </p>
+
+        <p className="mb-4 text-[12px] text-neutral-500">
+          {out ? "Out of stock" : formatStockBreakdown(product)}
+        </p>
+
+        <button
+          onClick={handleAdd}
+          disabled={out}
+          className="btn btn-red w-full"
+        >
+          <ShoppingCart className="h-4 w-4" />
+          Add to cart
+        </button>
+      </div>
+    </article>
+  );
+}
+
 export default function CatalogPage() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
@@ -38,8 +138,6 @@ export default function CatalogPage() {
   const [sort, setSort] = useState("name_asc");
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebounce(search);
-
-  const { addItem } = useCartActions();
 
   const params = new URLSearchParams({
     ...(debouncedSearch.length >= 2 ? { search: debouncedSearch } : {}),
@@ -51,17 +149,6 @@ export default function CatalogPage() {
 
   const { data, isLoading } = useSWR<CatalogData>(`/api/products?${params}`, fetcher);
 
-  function handleAddToCart(product: Product) {
-    addItem({
-      productId: product.id,
-      name: product.name,
-      price: Number(product.price),
-      quantity: 1,
-      stock: product.stockQuantity,
-    });
-    toast.success(`${product.name} added to cart`);
-  }
-
   const fieldClass =
     "rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-[13px] transition-colors focus:border-[hsl(var(--gold))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/20";
 
@@ -71,11 +158,10 @@ export default function CatalogPage() {
         eyebrow="Wholesale catalog"
         title="Browse the"
         accent="shelves"
-        description="Search by brand or generic, filter by category, and add to your cart in seconds."
+        description="Order by unit, bottle, or carton. Search by brand or generic and filter by category."
       />
 
       <PageBody>
-        {/* Filters */}
         <div className="flex flex-wrap gap-3">
           <div className="relative min-w-[12rem] flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
@@ -130,7 +216,6 @@ export default function CatalogPage() {
           </label>
         </div>
 
-        {/* Grid */}
         {isLoading ? (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {Array.from({ length: 12 }).map((_, i) => (
@@ -150,72 +235,12 @@ export default function CatalogPage() {
           </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {data!.products.map((p) => {
-              const out = p.stockQuantity === 0;
-              const low = p.stockQuantity > 0 && p.stockQuantity < 10;
-              return (
-                <article
-                  key={p.id}
-                  className="flex flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-[hsl(var(--navy))]/5 transition-shadow hover:shadow-[0_8px_30px_rgba(13,31,78,0.08)]"
-                >
-                  {/* Photo */}
-                  <div className="relative aspect-[4/3] bg-[hsl(var(--offwhite))]">
-                    {p.imageUrl ? (
-                      <Image
-                        src={p.imageUrl}
-                        alt={p.name}
-                        fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1280px) 33vw, 25vw"
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center">
-                        <Pill className="h-8 w-8 text-[hsl(var(--navy))]/15" />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex flex-1 flex-col p-5">
-                    <p className="eyebrow mb-2 text-[hsl(var(--red-2))]">
-                      {p.category}
-                    </p>
-                    <h3 className="serif mb-3 flex-1 text-[17px] leading-snug text-[hsl(var(--navy))]">
-                      {p.name}
-                    </h3>
-                    <p
-                      className="display mb-3 text-[hsl(var(--navy))]"
-                      style={{ fontSize: "26px" }}
-                    >
-                      {formatCurrency(Number(p.price))}
-                    </p>
-                    <div className="mb-4 flex items-center justify-between text-[12px]">
-                      <span
-                        className={out ? "text-neutral-400" : "text-neutral-500"}
-                      >
-                        {out ? "Out of stock" : `${p.stockQuantity} in stock`}
-                      </span>
-                      {low && (
-                        <span className="font-semibold uppercase tracking-wide text-[hsl(var(--red-2))]">
-                          Low stock
-                        </span>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => handleAddToCart(p)}
-                      disabled={out}
-                      className="btn btn-red w-full"
-                    >
-                      <ShoppingCart className="h-4 w-4" />
-                      Add to cart
-                    </button>
-                  </div>
-                </article>
-              );
-            })}
+            {data!.products.map((p) => (
+              <CatalogCard key={p.id} product={p} />
+            ))}
           </div>
         )}
 
-        {/* Pagination */}
         {(data?.pages ?? 0) > 1 && (
           <div className="flex items-center justify-center gap-3 pt-2">
             <button

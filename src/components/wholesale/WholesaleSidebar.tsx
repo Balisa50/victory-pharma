@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Package,
+  Warehouse,
   ClipboardList,
   Star,
   MessageSquareWarning,
@@ -20,6 +21,7 @@ const NAV_ITEMS = [
   { href: "/wholesale/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/wholesale/verification", label: "Verification", icon: ShieldCheck },
   { href: "/wholesale/products", label: "Products", icon: Package },
+  { href: "/wholesale/warehouse", label: "Warehouse", icon: Warehouse },
   { href: "/wholesale/orders", label: "Orders", icon: ClipboardList },
   { href: "/wholesale/reviews", label: "Reviews", icon: Star },
   { href: "/wholesale/complaints", label: "Complaints", icon: MessageSquareWarning },
