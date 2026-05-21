@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import useSWR from "swr";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Pill } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
@@ -88,9 +89,26 @@ export default function ProductsPage() {
                     return (
                       <tr key={p.id} className="ed-row">
                         <td className="px-6 py-4 md:px-7">
-                          <span className="serif italic text-[hsl(var(--navy))]">
-                            {p.name}
-                          </span>
+                          <div className="flex items-center gap-3">
+                            <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md bg-[hsl(var(--offwhite))] ring-1 ring-[hsl(var(--navy))]/5">
+                              {p.imageUrl ? (
+                                <Image
+                                  src={p.imageUrl}
+                                  alt={p.name}
+                                  fill
+                                  sizes="40px"
+                                  className="object-cover"
+                                />
+                              ) : (
+                                <div className="flex h-full items-center justify-center">
+                                  <Pill className="h-4 w-4 text-[hsl(var(--navy))]/20" />
+                                </div>
+                              )}
+                            </div>
+                            <span className="serif italic text-[hsl(var(--navy))]">
+                              {p.name}
+                            </span>
+                          </div>
                         </td>
                         <td className="px-4 py-4 text-[11px] uppercase tracking-[0.12em] text-neutral-400">
                           {p.category}

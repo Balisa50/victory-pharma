@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import useSWR from "swr";
 import { toast } from "sonner";
-import { Search, ChevronLeft, ChevronRight, ShoppingCart } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, ShoppingCart, Pill } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Skeleton } from "@/components/shared/LoadingSkeleton";
@@ -155,36 +156,59 @@ export default function CatalogPage() {
               return (
                 <article
                   key={p.id}
-                  className="flex flex-col rounded-2xl bg-white p-5 ring-1 ring-[hsl(var(--navy))]/5 transition-shadow hover:shadow-[0_8px_30px_rgba(13,31,78,0.08)]"
+                  className="flex flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-[hsl(var(--navy))]/5 transition-shadow hover:shadow-[0_8px_30px_rgba(13,31,78,0.08)]"
                 >
-                  <p className="eyebrow mb-2 text-[hsl(var(--red-2))]">{p.category}</p>
-                  <h3 className="serif mb-3 flex-1 text-[17px] leading-snug text-[hsl(var(--navy))]">
-                    {p.name}
-                  </h3>
-                  <p
-                    className="display mb-3 text-[hsl(var(--navy))]"
-                    style={{ fontSize: "26px" }}
-                  >
-                    {formatCurrency(Number(p.price))}
-                  </p>
-                  <div className="mb-4 flex items-center justify-between text-[12px]">
-                    <span className={out ? "text-neutral-400" : "text-neutral-500"}>
-                      {out ? "Out of stock" : `${p.stockQuantity} in stock`}
-                    </span>
-                    {low && (
-                      <span className="font-semibold uppercase tracking-wide text-[hsl(var(--red-2))]">
-                        Low stock
-                      </span>
+                  {/* Photo */}
+                  <div className="relative aspect-[4/3] bg-[hsl(var(--offwhite))]">
+                    {p.imageUrl ? (
+                      <Image
+                        src={p.imageUrl}
+                        alt={p.name}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1280px) 33vw, 25vw"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center">
+                        <Pill className="h-8 w-8 text-[hsl(var(--navy))]/15" />
+                      </div>
                     )}
                   </div>
-                  <button
-                    onClick={() => handleAddToCart(p)}
-                    disabled={out}
-                    className="btn btn-red w-full"
-                  >
-                    <ShoppingCart className="h-4 w-4" />
-                    Add to cart
-                  </button>
+
+                  <div className="flex flex-1 flex-col p-5">
+                    <p className="eyebrow mb-2 text-[hsl(var(--red-2))]">
+                      {p.category}
+                    </p>
+                    <h3 className="serif mb-3 flex-1 text-[17px] leading-snug text-[hsl(var(--navy))]">
+                      {p.name}
+                    </h3>
+                    <p
+                      className="display mb-3 text-[hsl(var(--navy))]"
+                      style={{ fontSize: "26px" }}
+                    >
+                      {formatCurrency(Number(p.price))}
+                    </p>
+                    <div className="mb-4 flex items-center justify-between text-[12px]">
+                      <span
+                        className={out ? "text-neutral-400" : "text-neutral-500"}
+                      >
+                        {out ? "Out of stock" : `${p.stockQuantity} in stock`}
+                      </span>
+                      {low && (
+                        <span className="font-semibold uppercase tracking-wide text-[hsl(var(--red-2))]">
+                          Low stock
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => handleAddToCart(p)}
+                      disabled={out}
+                      className="btn btn-red w-full"
+                    >
+                      <ShoppingCart className="h-4 w-4" />
+                      Add to cart
+                    </button>
+                  </div>
                 </article>
               );
             })}

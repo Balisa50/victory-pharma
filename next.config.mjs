@@ -14,7 +14,12 @@ const nextConfig = {
     optimizePackageImports: ["lucide-react", "recharts", "date-fns"],
   },
   images: {
-    remotePatterns: [],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "*.public.blob.vercel-storage.com",
+      },
+    ],
   },
 };
 

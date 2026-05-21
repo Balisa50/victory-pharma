@@ -13,6 +13,7 @@ export const createProductSchema = z.object({
       return new Date(val) > new Date();
     }, "Expiry date cannot be in the past"),
   availabilityStatus: z.boolean().default(true),
+  imageUrl: z.string().url("Invalid image URL").nullable().optional(),
 });
 
 export const updateProductSchema = createProductSchema.partial();

@@ -75,6 +75,7 @@ model Product {
   stockQuantity      Int      @default(0)
   expiryDate         DateTime?
   availabilityStatus Boolean  @default(true)
+  imageUrl           String?
   deletedAt          DateTime?
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
