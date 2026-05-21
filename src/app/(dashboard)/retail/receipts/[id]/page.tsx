@@ -1,10 +1,11 @@
 "use client";
 
 import { use, useState } from "react";
+import { Download, Printer } from "lucide-react";
+import { formatDateTime } from "@/lib/utils";
 import useSWR from "swr";
-import { Download } from "lucide-react";
-import { formatCurrency, formatDate, formatDateTime, PAYMENT_METHOD_LABELS } from "@/lib/utils";
 import { PageHeader, PageBody, Panel } from "@/components/shared/Editorial";
+import { ThermalReceipt } from "@/components/receipts/ThermalReceipt";
 import type { OrderItem } from "@/types";
 
 const fetcher = (url: string) =>
@@ -12,9 +13,11 @@ const fetcher = (url: string) =>
 
 type ReceiptData = {
   id: string;
+  receiptNumber: string;
   orderId: string;
   totalAmount: unknown;
   generatedAt: string;
+  printedCount: number;
   retailPharmacy: {
     name: string;
     pharmacyName: string | null;
@@ -24,9 +27,8 @@ type ReceiptData = {
   order: {
     id: string;
     createdAt: string;
-    totalAmount: unknown;
     orderItems: OrderItem[];
-    payment: { method: string; amount: unknown } | null;
+    payment: { method: string; status: string; amount: unknown } | null;
   };
 };
 
@@ -42,6 +44,12 @@ export default function ReceiptDetailPage({
   );
   const [downloading, setDownloading] = useState(false);
 
+  async function handlePrint() {
+    // Best-effort print tracking; never block the print dialog.
+    fetch(`/api/receipts/${id}/print`, { method: "POST" }).catch(() => {});
+    window.print();
+  }
+
   async function handleDownload() {
     if (!receipt) return;
     setDownloading(true);
@@ -52,7 +60,7 @@ export default function ReceiptDetailPage({
       );
       const blob = await pdf(
         ReceiptDocument({
-          receiptId: receipt.id,
+          receiptId: receipt.receiptNumber,
           orderId: receipt.orderId,
           pharmacyName:
             receipt.retailPharmacy.pharmacyName ?? receipt.retailPharmacy.name,
@@ -65,7 +73,7 @@ export default function ReceiptDetailPage({
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `receipt-${receipt.id.slice(-8)}.pdf`;
+      a.download = `${receipt.receiptNumber}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
     } finally {
@@ -83,7 +91,7 @@ export default function ReceiptDetailPage({
           back={{ href: "/retail/receipts", label: "Back to receipts" }}
         />
         <PageBody>
-          <div className="h-72 max-w-2xl animate-pulse rounded-2xl bg-white" />
+          <div className="mx-auto h-96 max-w-sm animate-pulse rounded-2xl bg-white" />
         </PageBody>
       </>
     );
@@ -109,128 +117,65 @@ export default function ReceiptDetailPage({
     );
   }
 
-  const meta: { label: string; value: React.ReactNode }[] = [
-    { label: "Receipt ID", value: `#${receipt.id.slice(-8).toUpperCase()}` },
-    { label: "Order ID", value: `#${receipt.orderId.slice(-8).toUpperCase()}` },
-    {
-      label: "Pharmacy",
-      value:
-        receipt.retailPharmacy.pharmacyName ?? receipt.retailPharmacy.name,
-    },
-    { label: "Date", value: formatDate(receipt.generatedAt) },
-    {
-      label: "Payment",
-      value: receipt.order.payment
-        ? PAYMENT_METHOD_LABELS[receipt.order.payment.method]
-        : "Not recorded",
-    },
-    {
-      label: "Status",
-      value: (
-        <span className="font-medium text-[hsl(var(--green))]">Confirmed</span>
-      ),
-    },
-  ];
-
   return (
     <>
       <PageHeader
         eyebrow={formatDateTime(receipt.generatedAt)}
         title="Receipt"
-        accent={`#${receipt.id.slice(-8).toUpperCase()}`}
+        accent={receipt.receiptNumber}
         back={{ href: "/retail/receipts", label: "Back to receipts" }}
         action={
-          <button
-            onClick={handleDownload}
-            disabled={downloading}
-            className="btn btn-red"
-          >
-            <Download className="h-4 w-4" />
-            {downloading ? "Generating..." : "Download PDF"}
-          </button>
+          <>
+            <button onClick={handlePrint} className="btn btn-navy no-print">
+              <Printer className="h-4 w-4" />
+              Print
+            </button>
+            <button
+              onClick={handleDownload}
+              disabled={downloading}
+              className="btn btn-red no-print"
+            >
+              <Download className="h-4 w-4" />
+              {downloading ? "Generating..." : "Download PDF"}
+            </button>
+          </>
         }
       />
 
       <PageBody>
-        <div className="max-w-2xl overflow-hidden rounded-2xl bg-white ring-1 ring-[hsl(var(--navy))]/5">
-          {/* Letterhead */}
-          <div className="border-b-2 border-[hsl(var(--gold))] bg-[hsl(var(--navy))] px-8 py-7 text-white">
-            <p className="eyebrow mb-1 text-[hsl(var(--gold))]">
-              Payment receipt
-            </p>
-            <h2 className="serif text-[24px]">
-              Victory <span className="text-[hsl(var(--gold))]">Pharmaceutical</span>
-            </h2>
+        <div className="flex flex-col items-center gap-3">
+          {/* On-screen paper slip — also the print target */}
+          <div className="rounded-xl bg-white shadow-[0_12px_40px_rgba(13,31,78,0.12)] ring-1 ring-[hsl(var(--navy))]/5">
+            <ThermalReceipt
+              receiptNumber={receipt.receiptNumber}
+              generatedAt={receipt.generatedAt}
+              pharmacyName={
+                receipt.retailPharmacy.pharmacyName ??
+                receipt.retailPharmacy.name
+              }
+              orderId={receipt.orderId}
+              items={receipt.order.orderItems.map((i) => ({
+                id: i.id,
+                productName: i.productName,
+                packLevel: i.packLevel,
+                quantity: i.quantity,
+                unitPrice: Number(i.unitPrice),
+                subtotal: Number(i.subtotal),
+              }))}
+              totalAmount={Number(receipt.totalAmount)}
+              paymentMethod={receipt.order.payment?.method ?? null}
+              paid={receipt.order.payment?.status === "confirmed"}
+              contactPhone={
+                process.env.NEXT_PUBLIC_CONTACT_PHONE ?? "+220 000 0000"
+              }
+            />
           </div>
 
-          <div className="px-8 py-7">
-            {/* Meta */}
-            <div className="mb-7 grid grid-cols-2 gap-5 sm:grid-cols-3">
-              {meta.map(({ label, value }) => (
-                <div key={label}>
-                  <p className="eyebrow mb-1 text-[hsl(var(--red-2))]">
-                    {label}
-                  </p>
-                  <p className="text-[13.5px] font-medium text-[hsl(var(--navy))]">
-                    {value}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            {/* Items */}
-            <table className="w-full text-[13.5px]">
-              <thead>
-                <tr className="ed-thead">
-                  <th className="py-3">Product</th>
-                  <th className="py-3 text-right">Qty</th>
-                  <th className="py-3 text-right">Unit price</th>
-                  <th className="py-3 text-right">Subtotal</th>
-                </tr>
-              </thead>
-              <tbody>
-                {receipt.order.orderItems.map((item) => (
-                  <tr key={item.id} className="border-b border-neutral-100">
-                    <td className="py-3 font-medium text-[hsl(var(--navy))]">
-                      {item.productName}
-                    </td>
-                    <td className="py-3 text-right text-neutral-500">
-                      {item.quantity}
-                    </td>
-                    <td className="py-3 text-right text-neutral-500">
-                      {formatCurrency(Number(item.unitPrice))}
-                    </td>
-                    <td className="py-3 text-right font-medium text-[hsl(var(--navy))]">
-                      {formatCurrency(Number(item.subtotal))}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td
-                    colSpan={3}
-                    className="pt-4 text-right text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-400"
-                  >
-                    Total
-                  </td>
-                  <td className="pt-4 text-right">
-                    <span
-                      className="display text-[hsl(var(--navy))]"
-                      style={{ fontSize: "28px" }}
-                    >
-                      {formatCurrency(Number(receipt.totalAmount))}
-                    </span>
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-
-            <p className="serif mt-8 border-t border-neutral-100 pt-6 text-center text-[13px] italic text-neutral-400">
-              Thank you for your business. Victory Pharmaceutical. Quality you
-              can trust.
-            </p>
-          </div>
+          <p className="no-print text-[11.5px] text-neutral-400">
+            Printed {receipt.printedCount}{" "}
+            {receipt.printedCount === 1 ? "time" : "times"} · 80mm thermal
+            format
+          </p>
         </div>
       </PageBody>
     </>

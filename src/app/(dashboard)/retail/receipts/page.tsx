@@ -57,8 +57,8 @@ export default function RetailReceiptsPage() {
                 ) : (
                   data!.map((r) => (
                     <tr key={r.id} className="ed-row">
-                      <td className="px-6 py-4 font-mono text-[11.5px] tracking-wide text-neutral-500 md:px-7">
-                        #{r.id.slice(-8).toUpperCase()}
+                      <td className="px-6 py-4 font-mono text-[11.5px] font-medium tracking-wide text-[hsl(var(--navy))] md:px-7">
+                        {r.receiptNumber}
                       </td>
                       <td className="px-4 py-4 font-mono text-[11.5px] tracking-wide text-neutral-400">
                         #{r.orderId.slice(-8).toUpperCase()}

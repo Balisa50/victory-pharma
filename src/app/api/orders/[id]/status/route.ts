@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { updateOrderStatusSchema } from "@/lib/validation/order";
+import { ensureReceipt } from "@/lib/receipts/generateReceipt";
 
 const ALLOWED_TRANSITIONS: Record<string, string[]> = {
   pending: ["confirmed", "cancelled"],
@@ -52,6 +53,11 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     await tx.orderStatusHistory.create({
       data: { orderId: params.id, status: parsed.data.status, changedBy: session.user.id },
     });
+
+    // A confirmed order earns its receipt (whichever comes first: this or payment).
+    if (parsed.data.status === "confirmed") {
+      await ensureReceipt(tx, params.id);
+    }
 
     return updatedOrder;
   });

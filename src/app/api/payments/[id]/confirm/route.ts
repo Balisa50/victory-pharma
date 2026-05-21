@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { ensureReceipt } from "@/lib/receipts/generateReceipt";
 
 export async function POST(_req: NextRequest, { params }: { params: { id: string } }) {
   const session = await auth();
@@ -24,16 +25,8 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
       data: { status: "confirmed" },
     });
 
-    const existingReceipt = await tx.receipt.findUnique({ where: { orderId: payment.orderId } });
-    if (!existingReceipt) {
-      await tx.receipt.create({
-        data: {
-          orderId: payment.orderId,
-          retailPharmacyId: payment.order.retailPharmacyId,
-          totalAmount: payment.amount,
-        },
-      });
-    }
+    // Generate a numbered receipt once payment is confirmed (idempotent).
+    await ensureReceipt(tx, payment.orderId);
 
     return updatedPayment;
   });
