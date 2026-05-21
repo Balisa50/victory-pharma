@@ -24,16 +24,7 @@ export default function LandingPage() {
           <a href="#partners" className="rounded-md px-3.5 py-1.5 text-[13px] font-medium tracking-wide text-white/70 transition-colors hover:bg-white/10 hover:text-[hsl(var(--gold))]">
             For pharmacies
           </a>
-          <Link href="/login" className="rounded-md px-3.5 py-1.5 text-[13px] font-medium tracking-wide text-white/70 transition-colors hover:bg-white/10 hover:text-[hsl(var(--gold))]">
-            Sign in
-          </Link>
         </div>
-        <Link
-          href="/register"
-          className="rounded-md bg-[hsl(var(--red))] px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.06em] text-white transition-colors hover:bg-[hsl(var(--red))]/85"
-        >
-          Open an account
-        </Link>
       </nav>
 
       {/* ── HERO ── */}
@@ -52,7 +43,7 @@ export default function LandingPage() {
           Medicine, <em>delivered</em><br className="hidden md:block" /> with confidence.
         </h1>
         <p className="mb-10 max-w-[560px] text-[18px] font-light leading-[1.7] text-white/55">
-          A quieter way to stock your pharmacy — verified products, predictable
+          A quieter way to stock your pharmacy: verified products, predictable
           pricing, and a delivery window you can actually trust.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-4">
@@ -93,8 +84,8 @@ export default function LandingPage() {
             Built for the way <em>real pharmacies</em> order.
           </h2>
           <p className="mb-12 max-w-[640px] text-[16px] font-light leading-[1.7] text-neutral-600">
-            Every shelf-keeper, every locum, every owner working a Saturday rush —
-            ordering should take a minute, not an afternoon. Victory streamlines the
+            Every shelf-keeper, every locum, every owner working a Saturday rush.
+            Ordering should take a minute, not an afternoon. Victory streamlines the
             in-between.
           </p>
 
@@ -113,7 +104,7 @@ export default function LandingPage() {
               {
                 icon: Wallet,
                 title: "Transparent pricing",
-                body: "No hidden line items. Settle by cash, mobile money, or bank transfer — whichever fits your day.",
+                body: "No hidden line items. Settle by cash, mobile money, or bank transfer, whichever fits your day.",
               },
             ].map(({ icon: Icon, title, body }) => (
               <div key={title} className="brand-card">
@@ -197,7 +188,7 @@ export default function LandingPage() {
             A wholesale partner that <em>shows up</em>.
           </h2>
           <p className="mb-10 max-w-[640px] text-[16px] font-light leading-[1.7] text-white/55">
-            We work with independent pharmacies across The Gambia — small shops,
+            We work with independent pharmacies across The Gambia: small shops,
             chains, and everything in between. Open an account in minutes; start
             ordering today.
           </p>
@@ -206,7 +197,7 @@ export default function LandingPage() {
             {[
               { tone: "urgent" as const, title: "Same-day dispatch", body: "Orders placed before 11 AM ship the same day, six days a week.", cta: "Open an account", href: "/register" },
               { tone: "campus" as const, title: "Net-30 for partners", body: "Verified accounts unlock flexible terms after three settled orders.", cta: "Learn more", href: "/register" },
-              { tone: "peer" as const, title: "Talk to a human", body: "Real people on WhatsApp and phone, 8 AM – 8 PM, every day.", cta: "Contact us", href: "mailto:hello@victorypharma.com" },
+              { tone: "peer" as const, title: "Talk to a human", body: "Real people on WhatsApp and phone, 8 AM to 8 PM, every day.", cta: "Contact us", href: "mailto:hello@victorypharma.com" },
             ].map(({ tone, title, body, cta, href }) => {
               const cardBg =
                 tone === "urgent"

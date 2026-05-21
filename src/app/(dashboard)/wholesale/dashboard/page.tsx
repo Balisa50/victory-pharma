@@ -81,7 +81,7 @@ export default function WholesaleDashboard() {
       <div className="space-y-8 px-8 py-8 md:px-12">
         {/* ── ASYMMETRIC HERO STATS ── */}
         <section className="grid gap-5 lg:grid-cols-3">
-          {/* Primary — Revenue */}
+          {/* Primary: Revenue */}
           <div className="relative overflow-hidden rounded-2xl bg-[hsl(var(--navy))] p-8 text-white lg:col-span-2">
             <span
               aria-hidden
@@ -99,7 +99,7 @@ export default function WholesaleDashboard() {
                   className="display text-white"
                   style={{ fontSize: "clamp(44px, 5.5vw, 68px)" }}
                 >
-                  {isLoading ? "—" : formatCurrency(data?.totalRevenue ?? 0)}
+                  {isLoading ? "..." : formatCurrency(data?.totalRevenue ?? 0)}
                 </p>
                 <p className="mt-3 text-[13px] font-light text-white/55">
                   {delta === 0
@@ -135,14 +135,14 @@ export default function WholesaleDashboard() {
             </div>
           </div>
 
-          {/* Secondary — Pending */}
+          {/* Secondary: Pending */}
           <div className="rounded-2xl bg-white p-7 ring-1 ring-[hsl(var(--navy))]/5">
             <p className="eyebrow mb-3 text-[hsl(var(--red-2))]">Pending payments</p>
             <p
               className="display text-[hsl(var(--navy))]"
               style={{ fontSize: "clamp(36px, 3vw, 44px)" }}
             >
-              {isLoading ? "—" : formatCurrency(data?.pendingPayments ?? 0)}
+              {isLoading ? "..." : formatCurrency(data?.pendingPayments ?? 0)}
             </p>
             <div className="mt-5 border-t border-neutral-100 pt-4">
               <p className="text-[12px] font-light leading-relaxed text-neutral-500">
@@ -171,7 +171,7 @@ export default function WholesaleDashboard() {
           <MetricTile
             eyebrow="Active pharmacies"
             value={String(
-              new Set(data?.recentOrders?.map((o) => o.retailPharmacy.id)).size || "—"
+              new Set(data?.recentOrders?.map((o) => o.retailPharmacy.id)).size
             )}
             tone="gold"
             footnote="Ordering in the last 30 days."
@@ -196,7 +196,7 @@ export default function WholesaleDashboard() {
                 <div className="h-56 animate-pulse rounded bg-neutral-50" />
               ) : chart.length === 0 ? (
                 <div className="py-12">
-                  <EmptyState message="No revenue recorded yet — orders will appear here as they settle." />
+                  <EmptyState message="No revenue recorded yet. Orders will appear here as they settle." />
                 </div>
               ) : (
                 <ResponsiveContainer width="100%" height={240}>
@@ -319,7 +319,7 @@ export default function WholesaleDashboard() {
                   <tr>
                     <td colSpan={4}>
                       <div className="py-14">
-                        <EmptyState message="No orders yet — your first one will land here in real time." />
+                        <EmptyState message="No orders yet. Your first one will land here in real time." />
                       </div>
                     </td>
                   </tr>
@@ -392,7 +392,7 @@ function MetricTile({
           className={`display ${numberColor}`}
           style={{ fontSize: "clamp(30px, 2.5vw, 38px)" }}
         >
-          {isLoading ? "—" : value}
+          {isLoading ? "..." : value}
         </p>
         <p className="mt-3 text-[12px] font-light leading-relaxed text-neutral-500">
           {footnote}

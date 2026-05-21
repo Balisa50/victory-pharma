@@ -77,7 +77,7 @@ export default function ProductsPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-gray-500">
-                      {p.expiryDate ? formatDate(p.expiryDate) : "—"}
+                      {p.expiryDate ? formatDate(p.expiryDate) : "Not set"}
                     </td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${p.availabilityStatus ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>

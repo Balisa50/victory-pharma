@@ -86,7 +86,7 @@ export default function CatalogPage() {
           onChange={(e) => setSort(e.target.value)}
           className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
         >
-          <option value="name_asc">Name A–Z</option>
+          <option value="name_asc">Name A-Z</option>
           <option value="price_asc">Price: Low to high</option>
           <option value="price_desc">Price: High to low</option>
         </select>

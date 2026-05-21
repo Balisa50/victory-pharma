@@ -69,7 +69,7 @@ export default function WholesaleReviewsPage() {
                         ))}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{r.comment ?? "—"}</td>
+                    <td className="px-4 py-3 text-gray-600">{r.comment ?? "No comment"}</td>
                     <td className="px-4 py-3 text-xs text-gray-500">{formatDate(r.createdAt)}</td>
                   </tr>
                 ))

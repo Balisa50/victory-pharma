@@ -121,7 +121,7 @@ export function ReceiptDocument({
         </View>
 
         <Text style={styles.footer}>
-          Thank you for your business. Victory Pharmaceutical — Quality you can trust.
+          Thank you for your business. Victory Pharmaceutical. Quality you can trust.
         </Text>
       </Page>
     </Document>

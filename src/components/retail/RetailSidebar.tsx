@@ -31,7 +31,7 @@ export function RetailSidebar({ pharmacyName }: { pharmacyName: string | null })
 
   return (
     <>
-      {/* Desktop sidebar — navy with gold accents */}
+      {/* Desktop sidebar: navy with gold accents */}
       <aside className="hidden w-64 flex-col border-r border-[hsl(var(--navy))]/10 bg-[hsl(var(--navy))] text-white md:flex">
         <div className="flex h-[68px] items-center gap-3 border-b-2 border-[hsl(var(--gold))] px-6">
           <div className="grid h-9 w-9 place-items-center rounded-full bg-white/10 ring-2 ring-white/15">

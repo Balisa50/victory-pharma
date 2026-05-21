@@ -30,7 +30,7 @@ export function WholesaleSidebar() {
 
   return (
     <>
-      {/* Desktop sidebar — deeper navy with red admin accent */}
+      {/* Desktop sidebar: deeper navy with red admin accent */}
       <aside className="hidden w-64 flex-col bg-[#0a1535] text-white md:flex">
         <div className="flex h-[68px] items-center gap-3 border-b-2 border-[hsl(var(--red))] px-6">
           <div className="grid h-9 w-9 place-items-center rounded-full bg-white/10 ring-2 ring-white/15">

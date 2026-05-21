@@ -71,7 +71,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         parsed.items.forEach((item) => dispatch({ type: "ADD_ITEM", payload: item }));
       }
     } catch {
-      // corrupted storage — start fresh
+      // corrupted storage, start fresh
     }
   }, []);
 

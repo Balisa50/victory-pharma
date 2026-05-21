@@ -57,7 +57,7 @@ export default function WholesaleOrderDetailPage({ params }: { params: Promise<{
       const res = await fetch(`/api/payments/${order.payment.id}/confirm`, { method: "POST" });
       const json = (await res.json()) as { success: boolean; error?: string };
       if (json.success) {
-        toast.success("Payment confirmed — receipt generated");
+        toast.success("Payment confirmed. Receipt generated");
         await mutate();
       } else {
         toast.error(json.error ?? "Failed to confirm payment");

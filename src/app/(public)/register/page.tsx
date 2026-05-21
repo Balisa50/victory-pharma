@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Pill, Loader2 } from "lucide-react";
+import { Pill, Loader2, ArrowLeft } from "lucide-react";
 import { registerSchema, type RegisterInput } from "@/lib/validation/auth";
 
 export default function RegisterPage() {
@@ -51,6 +51,14 @@ export default function RegisterPage() {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-4 py-12">
       <span aria-hidden className="pointer-events-none absolute -left-40 -top-32 h-96 w-96 rounded-full bg-[hsl(var(--navy-3))]/15 blur-[120px]" />
       <span aria-hidden className="pointer-events-none absolute -bottom-40 -right-32 h-96 w-96 rounded-full bg-[hsl(var(--gold))]/15 blur-[120px]" />
+
+      <Link
+        href="/"
+        className="absolute left-5 top-5 inline-flex items-center gap-1.5 text-[13px] font-medium text-neutral-500 transition-colors hover:text-[hsl(var(--navy))]"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to home
+      </Link>
 
       <div className="relative w-full max-w-md rounded-2xl bg-white p-9 shadow-[0_20px_60px_rgba(13,31,78,0.08)] ring-1 ring-[hsl(var(--navy))]/5">
         <div className="absolute inset-x-0 top-0 h-1 rounded-t-2xl bg-[hsl(var(--gold))]" />

@@ -105,7 +105,7 @@ export default function ReceiptDetailPage({ params }: { params: Promise<{ id: st
               { label: "Order ID", value: `#${receipt.orderId.slice(-8)}` },
               { label: "Pharmacy", value: receipt.retailPharmacy.pharmacyName ?? receipt.retailPharmacy.name },
               { label: "Date", value: formatDate(receipt.generatedAt) },
-              { label: "Payment", value: receipt.order.payment ? PAYMENT_METHOD_LABELS[receipt.order.payment.method] : "—" },
+              { label: "Payment", value: receipt.order.payment ? PAYMENT_METHOD_LABELS[receipt.order.payment.method] : "Not recorded" },
               { label: "Status", value: <span className="font-medium text-green-600">Confirmed</span> },
             ].map(({ label, value }) => (
               <div key={label}>
@@ -146,7 +146,7 @@ export default function ReceiptDetailPage({ params }: { params: Promise<{ id: st
           </table>
 
           <p className="mt-8 border-t border-gray-100 pt-6 text-center text-xs text-gray-400">
-            Thank you for your business. Victory Pharmaceutical — Quality you can trust.
+            Thank you for your business. Victory Pharmaceutical. Quality you can trust.
           </p>
         </div>
       </div>

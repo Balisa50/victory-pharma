@@ -38,7 +38,7 @@ export function PaymentModal({ order, onClose, onSubmitted }: Props) {
       });
       const json = (await res.json()) as { success: boolean; error?: string };
       if (json.success) {
-        toast.success("Payment submitted — awaiting confirmation");
+        toast.success("Payment submitted. Awaiting confirmation");
         onSubmitted();
       } else {
         toast.error(json.error ?? "Failed to submit payment");
