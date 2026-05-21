@@ -117,66 +117,12 @@ export function ProductModal({ product, onClose, onSaved }: Props) {
       title={product ? "Edit" : "Add a"}
       accent="product"
       onClose={onClose}
-      maxWidth="max-w-lg"
+      maxWidth="max-w-md"
     >
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="max-h-[75vh] space-y-4 overflow-y-auto px-6 py-6"
+        className="max-h-[70vh] space-y-3.5 overflow-y-auto px-6 py-5"
       >
-        {/* Image (optional) */}
-        <div>
-          <label className="field-label">Product photo (optional)</label>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="hidden"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) handleFile(f);
-              e.target.value = "";
-            }}
-          />
-          {imageUrl ? (
-            <div className="relative h-40 w-full overflow-hidden rounded-lg border border-neutral-200 bg-[hsl(var(--offwhite))]">
-              <Image
-                src={imageUrl}
-                alt="Product"
-                fill
-                sizes="480px"
-                className="object-contain"
-              />
-              <button
-                type="button"
-                onClick={() => setValue("imageUrl", null)}
-                className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-[hsl(var(--navy))] text-white transition-colors hover:bg-[hsl(var(--red))]"
-                aria-label="Remove image"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              disabled={uploading}
-              className="flex h-32 w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-neutral-300 bg-[hsl(var(--offwhite))] text-neutral-500 transition-colors hover:border-[hsl(var(--gold))] hover:text-[hsl(var(--navy))] disabled:opacity-60"
-            >
-              {uploading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <ImagePlus className="h-5 w-5" />
-              )}
-              <span className="text-[12.5px] font-medium">
-                {uploading ? "Uploading..." : "Upload a photo"}
-              </span>
-              <span className="text-[11px] text-neutral-400">
-                JPG, PNG or WebP, up to 4 MB
-              </span>
-            </button>
-          )}
-        </div>
-
         <Field label="Name" error={errors.name?.message}>
           <input
             {...register("name")}
@@ -193,7 +139,7 @@ export function ProductModal({ product, onClose, onSaved }: Props) {
           />
         </Field>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3.5">
           <Field label="Price (GMD)" error={errors.price?.message}>
             <input
               {...register("price", { valueAsNumber: true })}
@@ -229,7 +175,66 @@ export function ProductModal({ product, onClose, onSaved }: Props) {
           </span>
         </label>
 
-        <div className="flex justify-end gap-3 pt-2">
+        {/* Photo (optional) */}
+        <div>
+          <label className="field-label">Product photo (optional)</label>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleFile(f);
+              e.target.value = "";
+            }}
+          />
+          {imageUrl ? (
+            <div className="flex items-center gap-3 rounded-lg border border-neutral-200 bg-[hsl(var(--offwhite))] p-2">
+              <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-white">
+                <Image
+                  src={imageUrl}
+                  alt="Product"
+                  fill
+                  sizes="48px"
+                  className="object-cover"
+                />
+              </div>
+              <span className="flex-1 truncate text-[12.5px] text-neutral-500">
+                Photo attached
+              </span>
+              <button
+                type="button"
+                onClick={() => setValue("imageUrl", null)}
+                className="grid h-7 w-7 place-items-center rounded-full bg-[hsl(var(--navy))] text-white transition-colors hover:bg-[hsl(var(--red))]"
+                aria-label="Remove image"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="flex w-full items-center gap-3 rounded-lg border border-dashed border-neutral-300 bg-[hsl(var(--offwhite))] px-3.5 py-2.5 text-left text-neutral-500 transition-colors hover:border-[hsl(var(--gold))] hover:text-[hsl(var(--navy))] disabled:opacity-60"
+            >
+              {uploading ? (
+                <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+              ) : (
+                <ImagePlus className="h-4 w-4 shrink-0" />
+              )}
+              <span className="text-[12.5px] font-medium">
+                {uploading ? "Uploading..." : "Upload a photo"}
+              </span>
+              <span className="ml-auto text-[11px] text-neutral-400">
+                JPG/PNG/WebP, 4 MB
+              </span>
+            </button>
+          )}
+        </div>
+
+        <div className="flex justify-end gap-3 pt-1">
           <button type="button" onClick={onClose} className="btn btn-ghost">
             Cancel
           </button>
