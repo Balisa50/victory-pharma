@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
 
 /** Back-navigation link with arrow. */
 export function BackLink({ href, label }: { href: string; label: string }) {
@@ -157,5 +157,63 @@ export function StatTile({
 export function PageBody({ children }: { children: React.ReactNode }) {
   return (
     <div className="space-y-6 px-6 py-7 md:px-12 md:py-8">{children}</div>
+  );
+}
+
+/**
+ * Editorial modal shell: navy scrim, gold accent rail, eyebrow + serif
+ * title header with a close control. Body content is passed as children.
+ */
+export function Modal({
+  eyebrow,
+  title,
+  accent,
+  onClose,
+  children,
+  maxWidth = "max-w-md",
+}: {
+  eyebrow?: string;
+  title: string;
+  accent?: string;
+  onClose: () => void;
+  children: React.ReactNode;
+  maxWidth?: string;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 bg-[hsl(var(--navy))]/50 backdrop-blur-sm"
+        onClick={onClose}
+        aria-hidden
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        className={`relative w-full ${maxWidth} overflow-hidden rounded-2xl bg-white shadow-[0_30px_80px_rgba(13,31,78,0.25)]`}
+      >
+        <div className="absolute inset-x-0 top-0 h-1 bg-[hsl(var(--gold))]" />
+        <div className="flex items-start justify-between gap-4 border-b border-neutral-100 px-6 py-5">
+          <div>
+            {eyebrow && (
+              <p className="eyebrow mb-1 text-[hsl(var(--red-2))]">{eyebrow}</p>
+            )}
+            <h2 className="serif text-[19px] text-[hsl(var(--navy))]">
+              {title}{" "}
+              {accent && (
+                <em className="italic text-[hsl(var(--orange))]">{accent}</em>
+              )}
+            </h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="-mr-1.5 rounded-md p-1.5 text-neutral-400 transition-colors hover:bg-[hsl(var(--offwhite))] hover:text-[hsl(var(--navy))]"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        {children}
+      </div>
+    </div>
   );
 }

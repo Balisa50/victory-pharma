@@ -4,8 +4,12 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Loader2, X } from "lucide-react";
-import { createProductSchema, type CreateProductInput } from "@/lib/validation/product";
+import { Loader2 } from "lucide-react";
+import {
+  createProductSchema,
+  type CreateProductInput,
+} from "@/lib/validation/product";
+import { Modal } from "@/components/shared/Editorial";
 import type { Product } from "@/types";
 
 type Props = {
@@ -65,89 +69,79 @@ export function ProductModal({ product, onClose, onSaved }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
-        <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">
-            {product ? "Edit product" : "Add product"}
-          </h2>
-          <button onClick={onClose} className="rounded p-1 text-gray-400 hover:text-gray-700">
-            <X className="h-5 w-5" />
-          </button>
+    <Modal
+      eyebrow="Inventory"
+      title={product ? "Edit" : "Add a"}
+      accent="product"
+      onClose={onClose}
+      maxWidth="max-w-lg"
+    >
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 px-6 py-6">
+        <Field label="Name" error={errors.name?.message}>
+          <input
+            {...register("name")}
+            className="field"
+            placeholder="Paracetamol 500mg"
+          />
+        </Field>
+
+        <Field label="Category" error={errors.category?.message}>
+          <input
+            {...register("category")}
+            className="field"
+            placeholder="Analgesic"
+          />
+        </Field>
+
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Price (GMD)" error={errors.price?.message}>
+            <input
+              {...register("price", { valueAsNumber: true })}
+              type="number"
+              step="0.01"
+              min="0.01"
+              className="field"
+              placeholder="0.00"
+            />
+          </Field>
+          <Field label="Stock quantity" error={errors.stockQuantity?.message}>
+            <input
+              {...register("stockQuantity", { valueAsNumber: true })}
+              type="number"
+              min="0"
+              className="field"
+            />
+          </Field>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <Field label="Name" error={errors.name?.message}>
-            <input {...register("name")} className={inputCls} placeholder="Paracetamol 500mg" />
-          </Field>
+        <Field label="Expiry date (optional)" error={errors.expiryDate?.message}>
+          <input {...register("expiryDate")} type="date" className="field" />
+        </Field>
 
-          <Field label="Category" error={errors.category?.message}>
-            <input {...register("category")} className={inputCls} placeholder="Analgesic" />
-          </Field>
+        <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-neutral-200 bg-[hsl(var(--offwhite))] px-3.5 py-2.5">
+          <input
+            {...register("availabilityStatus")}
+            type="checkbox"
+            className="h-4 w-4 rounded border-neutral-300 accent-[hsl(var(--red))]"
+          />
+          <span className="text-[13px] font-medium text-[hsl(var(--navy))]">
+            Available for ordering
+          </span>
+        </label>
 
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Price (GMD)" error={errors.price?.message}>
-              <input
-                {...register("price", { valueAsNumber: true })}
-                type="number"
-                step="0.01"
-                min="0.01"
-                className={inputCls}
-                placeholder="0.00"
-              />
-            </Field>
-            <Field label="Stock quantity" error={errors.stockQuantity?.message}>
-              <input
-                {...register("stockQuantity", { valueAsNumber: true })}
-                type="number"
-                min="0"
-                className={inputCls}
-              />
-            </Field>
-          </div>
-
-          <Field label="Expiry date (optional)" error={errors.expiryDate?.message}>
-            <input {...register("expiryDate")} type="date" className={inputCls} />
-          </Field>
-
-          <div className="flex items-center gap-3">
-            <input
-              {...register("availabilityStatus")}
-              type="checkbox"
-              id="available"
-              className="h-4 w-4 rounded border-gray-300 text-emerald-600"
-            />
-            <label htmlFor="available" className="text-sm font-medium text-gray-700">
-              Available for ordering
-            </label>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-lg border px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
-            >
-              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              {product ? "Save changes" : "Add product"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <div className="flex justify-end gap-3 pt-2">
+          <button type="button" onClick={onClose} className="btn btn-ghost">
+            Cancel
+          </button>
+          <button type="submit" disabled={loading} className="btn btn-red">
+            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+            {product ? "Save changes" : "Add product"}
+          </button>
+        </div>
+      </form>
+    </Modal>
   );
 }
-
-const inputCls =
-  "w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500";
 
 function Field({
   label,
@@ -160,9 +154,9 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-sm font-medium text-gray-700">{label}</label>
+      <label className="field-label">{label}</label>
       {children}
-      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+      {error && <p className="field-error">{error}</p>}
     </div>
   );
 }

@@ -130,4 +130,18 @@
   .ed-row {
     @apply border-b border-neutral-100 transition-colors hover:bg-[hsl(var(--offwhite))];
   }
+
+  /* Form fields */
+  .field-label {
+    @apply mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-600;
+  }
+  .field {
+    @apply w-full rounded-lg border border-neutral-200 bg-[hsl(var(--offwhite))] px-3.5 py-2.5 text-[13.5px] text-[hsl(var(--navy))] transition-colors;
+  }
+  .field:focus {
+    @apply border-[hsl(var(--gold))] bg-white outline-none ring-2 ring-[hsl(var(--gold))]/20;
+  }
+  .field-error {
+    @apply mt-1 text-[11.5px] text-[hsl(var(--red))];
+  }
 }

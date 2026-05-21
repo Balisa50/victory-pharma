@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { Modal } from "@/components/shared/Editorial";
 
 type Props = {
   trigger: React.ReactNode;
@@ -37,31 +38,33 @@ export function ConfirmDialog({
     <>
       <span onClick={() => setOpen(true)}>{trigger}</span>
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
-          <div className="relative w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
-            <h2 className="mb-2 text-lg font-semibold text-gray-900">{title}</h2>
-            <p className="mb-6 text-sm text-gray-500">{description}</p>
-            <div className="flex justify-end gap-3">
+        <Modal
+          eyebrow={destructive ? "Please confirm" : "Confirm"}
+          title={title}
+          onClose={() => setOpen(false)}
+        >
+          <div className="px-6 py-6">
+            <p className="text-[13.5px] font-light leading-relaxed text-neutral-600">
+              {description}
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
               <button
                 onClick={() => setOpen(false)}
-                className="rounded-lg border px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="btn btn-ghost"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirm}
                 disabled={loading}
-                className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white disabled:opacity-60 ${
-                  destructive ? "bg-red-600 hover:bg-red-700" : "bg-blue-600 hover:bg-blue-700"
-                }`}
+                className={`btn ${destructive ? "btn-red" : "btn-navy"}`}
               >
                 {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                 {confirmLabel}
               </button>
             </div>
           </div>
-        </div>
+        </Modal>
       )}
     </>
   );
