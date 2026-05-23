@@ -12,6 +12,7 @@ import {
   Star,
   MessageSquareWarning,
   Phone,
+  Settings,
   LogOut,
   Pill,
   ShieldCheck,
@@ -26,6 +27,7 @@ const NAV_ITEMS = [
   { href: "/wholesale/reviews", label: "Reviews", icon: Star },
   { href: "/wholesale/complaints", label: "Complaints", icon: MessageSquareWarning },
   { href: "/wholesale/contact", label: "Contact", icon: Phone },
+  { href: "/wholesale/settings", label: "Settings", icon: Settings },
 ];
 
 export function WholesaleSidebar() {

@@ -234,6 +234,23 @@ model ReceiptSequence {
   @@map("receipt_sequences")
 }
 
+// Single-row site configuration, editable by the admin and surfaced publicly.
+model SiteSetting {
+  id             String   @id @default("default")
+  companyEmail   String?
+  whatsappNumber String?
+  phonePrimary   String?
+  phoneSecondary String?
+  address        String?
+  facebookUrl    String?
+  instagramUrl   String?
+  twitterUrl     String?
+  footerText     String?
+  updatedAt      DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
 model Review {
   id               String   @id @default(cuid())
   orderId          String   @unique

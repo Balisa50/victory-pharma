@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import useSWR from "swr";
-import { Plus, SlidersHorizontal } from "lucide-react";
-import { formatDateTime } from "@/lib/utils";
+import { Plus, SlidersHorizontal, AlertTriangle } from "lucide-react";
+import { formatDate, formatDateTime } from "@/lib/utils";
 import { formatStockBreakdown } from "@/lib/packaging";
 import { PageHeader, PageBody, Panel } from "@/components/shared/Editorial";
 import { EmptyState } from "@/components/shared/EmptyState";
@@ -42,6 +42,20 @@ export default function WarehousePage() {
 
   const products = data?.products ?? [];
   const movements = data?.movements ?? [];
+
+  // Products expiring within 60 days (or already past).
+  const expiring = useMemo(() => {
+    const cutoff = Date.now() + 60 * 24 * 60 * 60 * 1000;
+    return products
+      .filter((p) => p.expiryDate)
+      .map((p) => {
+        const t = new Date(p.expiryDate as Date | string).getTime();
+        const days = Math.ceil((t - Date.now()) / (24 * 60 * 60 * 1000));
+        return { product: p, days, t };
+      })
+      .filter(({ t }) => t <= cutoff)
+      .sort((a, b) => a.t - b.t);
+  }, [products]);
 
   return (
     <>
@@ -137,6 +151,61 @@ export default function WarehousePage() {
               </tbody>
             </table>
           </div>
+        </Panel>
+
+        {/* Expiring soon */}
+        <Panel
+          eyebrow="Watchlist"
+          title="Expiring"
+          accent="soon"
+          action={
+            <span className="text-[11px] uppercase tracking-[0.14em] text-neutral-400">
+              Next 60 days
+            </span>
+          }
+        >
+          {expiring.length === 0 ? (
+            <div className="px-6 py-10 text-center text-[13px] font-light text-neutral-500 md:px-7">
+              No products are expiring in the next 60 days.
+            </div>
+          ) : (
+            <ul className="divide-y divide-neutral-100">
+              {expiring.map(({ product, days }) => {
+                const expired = days < 0;
+                const urgent = !expired && days <= 14;
+                return (
+                  <li
+                    key={product.id}
+                    className="flex items-center justify-between gap-3 px-6 py-4 md:px-7"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="serif italic text-[hsl(var(--navy))]">
+                        {product.name}
+                      </p>
+                      <p className="mt-0.5 text-[11.5px] uppercase tracking-[0.12em] text-neutral-400">
+                        {product.category} ·{" "}
+                        {formatDate(product.expiryDate as Date | string)}
+                      </p>
+                    </div>
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${
+                        expired
+                          ? "bg-[hsl(var(--red))]/15 text-[hsl(var(--red))]"
+                          : urgent
+                          ? "bg-[hsl(var(--red-2))]/12 text-[hsl(var(--red-2))]"
+                          : "bg-[hsl(var(--gold))]/15 text-[hsl(var(--gold))]"
+                      }`}
+                    >
+                      <AlertTriangle className="h-3 w-3" />
+                      {expired
+                        ? `Expired ${Math.abs(days)}d ago`
+                        : `${days}d left`}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </Panel>
 
         {/* Movement log */}
