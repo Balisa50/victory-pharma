@@ -234,6 +234,24 @@ model ReceiptSequence {
   @@map("receipt_sequences")
 }
 
+// Public news / media posts authored by the wholesale admin.
+model NewsPost {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  excerpt     String?
+  body        String    @db.Text
+  coverImage  String?
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+  authorId    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([published, publishedAt])
+  @@map("news_posts")
+}
+
 // Single-row site configuration, editable by the admin and surfaced publicly.
 model SiteSetting {
   id             String   @id @default("default")

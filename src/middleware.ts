@@ -12,6 +12,11 @@ export default auth((req) => {
   const { pathname } = req.nextUrl;
   const user = req.auth?.user;
 
+  // Public news is open to everyone, signed in or not.
+  if (pathname.startsWith("/news")) {
+    return NextResponse.next();
+  }
+
   // A retail pharmacy whose account has not been approved yet.
   const isUnapprovedRetail =
     user?.role === "retail_pharmacy" && user?.status !== "active";

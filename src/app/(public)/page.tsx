@@ -24,6 +24,9 @@ export default function LandingPage() {
           <a href="#partners" className="rounded-md px-3.5 py-1.5 text-[13px] font-medium tracking-wide text-white/70 transition-colors hover:bg-white/10 hover:text-[hsl(var(--gold))]">
             For pharmacies
           </a>
+          <Link href="/news" className="rounded-md px-3.5 py-1.5 text-[13px] font-medium tracking-wide text-white/70 transition-colors hover:bg-white/10 hover:text-[hsl(var(--gold))]">
+            News
+          </Link>
         </div>
       </nav>
 
