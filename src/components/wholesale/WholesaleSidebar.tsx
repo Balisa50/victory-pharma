@@ -13,6 +13,7 @@ import {
   MessageSquareWarning,
   Phone,
   Settings,
+  Users,
   LogOut,
   Pill,
   ShieldCheck,
@@ -26,6 +27,7 @@ const NAV_ITEMS = [
   { href: "/wholesale/orders", label: "Orders", icon: ClipboardList },
   { href: "/wholesale/reviews", label: "Reviews", icon: Star },
   { href: "/wholesale/complaints", label: "Complaints", icon: MessageSquareWarning },
+  { href: "/wholesale/users", label: "Users", icon: Users },
   { href: "/wholesale/contact", label: "Contact", icon: Phone },
   { href: "/wholesale/settings", label: "Settings", icon: Settings },
 ];

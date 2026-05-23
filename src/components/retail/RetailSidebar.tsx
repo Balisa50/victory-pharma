@@ -12,6 +12,7 @@ import {
   Package,
   Receipt,
   Phone,
+  UserCircle,
   LogOut,
   Pill,
 } from "lucide-react";
@@ -22,6 +23,7 @@ const NAV_ITEMS = [
   { href: "/retail/cart", label: "Cart", icon: ShoppingCart, showBadge: true },
   { href: "/retail/orders", label: "Orders", icon: Package },
   { href: "/retail/receipts", label: "Receipts", icon: Receipt },
+  { href: "/retail/profile", label: "Profile", icon: UserCircle },
   { href: "/retail/contact", label: "Contact", icon: Phone },
 ];
 
