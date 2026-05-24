@@ -3,11 +3,12 @@
 import { use, useState } from "react";
 import useSWR from "swr";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Tag } from "lucide-react";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { OrderTimeline } from "@/components/shared/OrderTimeline";
 import { PageHeader, PageBody, Panel } from "@/components/shared/Editorial";
+import { DiscountModal } from "./components/DiscountModal";
 import type { OrderWithRelations } from "@/types";
 
 const fetcher = (url: string) =>
@@ -34,6 +35,7 @@ export default function WholesaleOrderDetailPage({
     refreshInterval: 10000,
   });
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [discountOpen, setDiscountOpen] = useState(false);
 
   async function updateStatus(status: string) {
     setActionLoading(status);
@@ -133,6 +135,18 @@ export default function WholesaleOrderDetailPage({
                 {nextAction.label}
               </button>
             )}
+            {order.payment?.status !== "confirmed" && (
+              <button
+                type="button"
+                onClick={() => setDiscountOpen(true)}
+                className="btn btn-ghost"
+              >
+                <Tag className="h-4 w-4" />
+                {Number(order.discountAmount) > 0
+                  ? "Edit discount"
+                  : "Apply discount"}
+              </button>
+            )}
             {order.payment &&
               order.payment.status === "pending_confirmation" && (
                 <button
@@ -200,12 +214,42 @@ export default function WholesaleOrderDetailPage({
                   ))}
                 </tbody>
                 <tfoot>
+                  {Number(order.discountAmount) > 0 && (
+                    <>
+                      <tr>
+                        <td
+                          colSpan={3}
+                          className="px-4 pt-4 text-right text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-400"
+                        >
+                          Subtotal
+                        </td>
+                        <td className="px-6 pt-4 text-right text-[13.5px] text-neutral-500 md:px-7">
+                          {formatCurrency(Number(order.subtotal ?? order.totalAmount))}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td
+                          colSpan={3}
+                          className="px-4 pt-1 text-right text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--red-2))]"
+                        >
+                          Discount
+                          {order.discountType === "percentage" &&
+                            order.discountValue
+                              ? ` (${Number(order.discountValue)}%)`
+                              : ""}
+                        </td>
+                        <td className="px-6 pt-1 text-right text-[13.5px] text-[hsl(var(--red-2))] md:px-7">
+                          -{formatCurrency(Number(order.discountAmount))}
+                        </td>
+                      </tr>
+                    </>
+                  )}
                   <tr>
                     <td
                       colSpan={3}
                       className="px-4 pt-4 text-right text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-400"
                     >
-                      Total
+                      {Number(order.discountAmount) > 0 ? "Final total" : "Total"}
                     </td>
                     <td className="px-6 pt-4 text-right md:px-7">
                       <span
@@ -281,6 +325,24 @@ export default function WholesaleOrderDetailPage({
           </div>
         </div>
       </PageBody>
+
+      {discountOpen && (
+        <DiscountModal
+          orderId={order.id}
+          subtotal={Number(order.subtotal ?? order.totalAmount)}
+          initialType={order.discountType}
+          initialValue={
+            order.discountValue !== null && order.discountValue !== undefined
+              ? Number(order.discountValue)
+              : null
+          }
+          onClose={() => setDiscountOpen(false)}
+          onDone={() => {
+            setDiscountOpen(false);
+            mutate();
+          }}
+        />
+      )}
     </>
   );
 }

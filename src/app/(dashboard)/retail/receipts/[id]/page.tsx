@@ -27,6 +27,10 @@ type ReceiptData = {
   order: {
     id: string;
     createdAt: string;
+    subtotal: unknown;
+    discountType: string | null;
+    discountValue: unknown;
+    discountAmount: unknown;
     orderItems: OrderItem[];
     payment: { method: string; status: string; amount: unknown } | null;
   };
@@ -163,6 +167,22 @@ export default function ReceiptDetailPage({
                 subtotal: Number(i.subtotal),
               }))}
               totalAmount={Number(receipt.totalAmount)}
+              subtotal={
+                receipt.order.subtotal != null
+                  ? Number(receipt.order.subtotal)
+                  : null
+              }
+              discountAmount={
+                receipt.order.discountAmount != null
+                  ? Number(receipt.order.discountAmount)
+                  : null
+              }
+              discountType={receipt.order.discountType}
+              discountValue={
+                receipt.order.discountValue != null
+                  ? Number(receipt.order.discountValue)
+                  : null
+              }
               paymentMethod={receipt.order.payment?.method ?? null}
               paid={receipt.order.payment?.status === "confirmed"}
               contactPhone={

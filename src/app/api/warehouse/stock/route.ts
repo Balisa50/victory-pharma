@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { addStockSchema, adjustStockSchema } from "@/lib/validation/warehouse";
-import { addStock, adjustStock } from "@/lib/warehouse/stockService";
+import {
+  addStockSchema,
+  adjustStockSchema,
+  transferStockSchema,
+} from "@/lib/validation/warehouse";
+import { addStock, adjustStock, transferStock } from "@/lib/warehouse/stockService";
 import { unitsForPack } from "@/lib/packaging";
 
 async function requireAdmin() {
@@ -37,9 +41,10 @@ export async function GET() {
 const actionSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("add") }).merge(addStockSchema),
   z.object({ action: z.literal("adjust") }).merge(adjustStockSchema),
+  z.object({ action: z.literal("transfer") }).merge(transferStockSchema),
 ]);
 
-/** POST: add stock (cartons/bottles/units) or apply a manual adjustment. */
+/** POST: add (warehouse), transfer (warehouse→sales), or adjust stock. */
 export async function POST(req: NextRequest) {
   const session = await requireAdmin();
   if (!session) {
@@ -73,6 +78,31 @@ export async function POST(req: NextRequest) {
         bottles * unitsForPack(product, "bottle") +
         units;
       const updated = await addStock({
+        productId,
+        baseUnits,
+        adminId: session.user.id,
+        note: note ?? null,
+      });
+      return NextResponse.json({ success: true, data: updated });
+    }
+
+    if (parsed.data.action === "transfer") {
+      const { productId, cartons, bottles, units, note } = parsed.data;
+      const product = await prisma.product.findUnique({
+        where: { id: productId },
+        select: { unitsPerBottle: true, bottlesPerCarton: true },
+      });
+      if (!product) {
+        return NextResponse.json(
+          { success: false, error: "Product not found" },
+          { status: 404 }
+        );
+      }
+      const baseUnits =
+        cartons * unitsForPack(product, "carton") +
+        bottles * unitsForPack(product, "bottle") +
+        units;
+      const updated = await transferStock({
         productId,
         baseUnits,
         adminId: session.user.id,

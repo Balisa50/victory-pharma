@@ -1,11 +1,15 @@
 import { prisma } from "@/lib/db";
 
 /**
- * Warehouse stock operations. All stock is held in BASE UNITS; every change
- * is written atomically alongside a StockMovement audit record.
+ * Warehouse stock operations. Stock lives in two pools:
+ *   warehouseUnits  – bulk reserve held by the admin (never directly sellable)
+ *   stockUnits      – sales inventory, the only pool retail can order from
+ *
+ * Movements between and within the pools are always written atomically
+ * alongside a StockMovement audit row.
  */
 
-/** Add stock (already converted to base units) and log the movement. */
+/** Add stock into the WAREHOUSE pool (e.g. from a supplier delivery). */
 export async function addStock(params: {
   productId: string;
   baseUnits: number;
@@ -18,7 +22,7 @@ export async function addStock(params: {
   const [product] = await prisma.$transaction([
     prisma.product.update({
       where: { id: params.productId },
-      data: { stockUnits: { increment: params.baseUnits } },
+      data: { warehouseUnits: { increment: params.baseUnits } },
     }),
     prisma.stockMovement.create({
       data: {
@@ -33,7 +37,54 @@ export async function addStock(params: {
   return product;
 }
 
-/** Apply a signed manual adjustment in base units; refuses to go negative. */
+/**
+ * Transfer stock from the warehouse pool into the sales pool. This is the
+ * only way sales stock ever increases.
+ */
+export async function transferStock(params: {
+  productId: string;
+  baseUnits: number;
+  adminId: string;
+  note?: string | null;
+}) {
+  if (params.baseUnits <= 0) {
+    throw new Error("Transfer amount must be positive");
+  }
+  const product = await prisma.product.findUnique({
+    where: { id: params.productId },
+    select: { id: true, warehouseUnits: true },
+  });
+  if (!product) {
+    throw new Error("Product not found");
+  }
+  if (product.warehouseUnits < params.baseUnits) {
+    throw new Error("Not enough warehouse stock for this transfer");
+  }
+
+  const [updated] = await prisma.$transaction([
+    prisma.product.update({
+      where: { id: params.productId },
+      data: {
+        warehouseUnits: { decrement: params.baseUnits },
+        stockUnits: { increment: params.baseUnits },
+      },
+    }),
+    prisma.stockMovement.create({
+      data: {
+        productId: params.productId,
+        actionType: "STOCK_TRANSFER",
+        quantity: params.baseUnits,
+        adminId: params.adminId,
+        note:
+          params.note ??
+          `Transferred ${params.baseUnits} units to sales inventory`,
+      },
+    }),
+  ]);
+  return updated;
+}
+
+/** Apply a signed manual adjustment to the WAREHOUSE pool. */
 export async function adjustStock(params: {
   productId: string;
   adjustment: number;
@@ -42,19 +93,19 @@ export async function adjustStock(params: {
 }) {
   const product = await prisma.product.findUnique({
     where: { id: params.productId },
-    select: { id: true, stockUnits: true },
+    select: { id: true, warehouseUnits: true },
   });
   if (!product) {
     throw new Error("Product not found");
   }
-  if (product.stockUnits + params.adjustment < 0) {
-    throw new Error("Adjustment would drive stock below zero");
+  if (product.warehouseUnits + params.adjustment < 0) {
+    throw new Error("Adjustment would drive warehouse stock below zero");
   }
 
   const [updated] = await prisma.$transaction([
     prisma.product.update({
       where: { id: params.productId },
-      data: { stockUnits: { increment: params.adjustment } },
+      data: { warehouseUnits: { increment: params.adjustment } },
     }),
     prisma.stockMovement.create({
       data: {

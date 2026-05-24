@@ -99,11 +99,15 @@ model Product {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
-  // Multi-level packaging. Stock is tracked in base units (the smallest
-  // sellable item); bottles and cartons are derived via conversion rates.
-  // price is the per-base-unit price; bottle/carton prices are multiples.
+  // Multi-level packaging. Stock is tracked in base units; bottles and
+  // cartons are derived via conversion rates.
+  // Stock is split into two pools:
+  //   warehouseUnits = bulk reserve (admin-only, NEVER sellable directly)
+  //   stockUnits     = sales inventory, the ONLY pool retail can order from
+  // Sales stock only changes through orders (out) and admin transfers (in).
   unitsPerBottle    Int     @default(1)
   bottlesPerCarton  Int     @default(1)
+  warehouseUnits    Int     @default(0)
   stockUnits        Int     @default(0)
   lowStockThreshold Int     @default(10)
   allowBottleSale   Boolean @default(true)
@@ -134,16 +138,23 @@ model StockMovement {
 }
 
 enum StockActionType {
-  STOCK_ADD
-  ORDER_DEDUCTION
-  MANUAL_ADJUST
+  STOCK_ADD        // received into warehouse
+  STOCK_TRANSFER   // moved from warehouse to sales inventory
+  ORDER_DEDUCTION  // consumed by a customer order (sales)
+  MANUAL_ADJUST    // signed correction (warehouse)
 }
 
 model Order {
   id                String      @id @default(cuid())
   retailPharmacyId  String
   status            OrderStatus @default(pending)
+  // totalAmount is the FINAL payable (post-discount). subtotal is the
+  // pre-discount sum of line items. discountAmount = subtotal - totalAmount.
   totalAmount       Decimal     @db.Decimal(12, 2)
+  subtotal          Decimal?    @db.Decimal(12, 2)
+  discountType      String?     // "percentage" | "fixed"
+  discountValue     Decimal?    @db.Decimal(12, 2)
+  discountAmount    Decimal     @default(0) @db.Decimal(12, 2)
   notes             String?
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt

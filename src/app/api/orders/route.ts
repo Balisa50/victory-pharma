@@ -109,6 +109,7 @@ export async function POST(req: NextRequest) {
         data: {
           retailPharmacyId: session.user.id,
           totalAmount,
+          subtotal: totalAmount, // pre-discount; equals totalAmount until admin applies one
           status: "pending",
           orderItems: {
             create: lines.map((l) => ({

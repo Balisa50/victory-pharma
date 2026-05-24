@@ -154,12 +154,41 @@ export default function RetailOrderDetailPage({
                   ))}
                 </tbody>
                 <tfoot>
+                  {Number(order.discountAmount) > 0 && (
+                    <>
+                      <tr>
+                        <td
+                          colSpan={3}
+                          className="px-4 pt-4 text-right text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-400"
+                        >
+                          Subtotal
+                        </td>
+                        <td className="px-6 pt-4 text-right text-[13.5px] text-neutral-500 md:px-7">
+                          {formatCurrency(Number(order.subtotal ?? order.totalAmount))}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td
+                          colSpan={3}
+                          className="px-4 pt-1 text-right text-[11px] font-semibold uppercase tracking-[0.16em] text-[hsl(var(--red-2))]"
+                        >
+                          Discount
+                          {order.discountType === "percentage" && order.discountValue
+                            ? ` (${Number(order.discountValue)}%)`
+                            : ""}
+                        </td>
+                        <td className="px-6 pt-1 text-right text-[13.5px] text-[hsl(var(--red-2))] md:px-7">
+                          -{formatCurrency(Number(order.discountAmount))}
+                        </td>
+                      </tr>
+                    </>
+                  )}
                   <tr>
                     <td
                       colSpan={3}
                       className="px-4 pt-4 text-right text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-400"
                     >
-                      Total
+                      {Number(order.discountAmount) > 0 ? "Final total" : "Total"}
                     </td>
                     <td className="px-6 pt-4 text-right md:px-7">
                       <span
