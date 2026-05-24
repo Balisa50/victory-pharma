@@ -30,7 +30,7 @@ export default async function LandingPage() {
       <nav className="fixed inset-x-0 top-0 z-50 flex h-[72px] items-center justify-between border-b border-neutral-100 bg-white/95 px-6 backdrop-blur md:px-10">
         <Link href="/" className="flex items-center gap-3">
           <Image
-            src="/logo.png"
+            src="/logo.jpg"
             alt="Victory Pharmaceuticals"
             width={44}
             height={44}
@@ -116,7 +116,7 @@ export default async function LandingPage() {
             <div className="absolute inset-0 rounded-3xl bg-[radial-gradient(circle_at_center,_rgba(2,165,84,0.12)_0%,_transparent_70%)]" />
             <div className="relative mx-auto aspect-square w-full max-w-[440px]">
               <Image
-                src="/logo.png"
+                src="/logo.jpg"
                 alt="Victory Pharmaceuticals logo"
                 fill
                 sizes="(max-width: 768px) 80vw, 440px"
@@ -397,7 +397,7 @@ export default async function LandingPage() {
             <div>
               <div className="mb-4 flex items-center gap-3">
                 <Image
-                  src="/logo.png"
+                  src="/logo.jpg"
                   alt="Victory Pharmaceuticals"
                   width={44}
                   height={44}
