@@ -57,7 +57,7 @@ export function ConfirmDialog({
               <button
                 onClick={handleConfirm}
                 disabled={loading}
-                className={`btn ${destructive ? "btn-red" : "btn-navy"}`}
+                className={`btn ${destructive ? "btn-danger" : "btn-navy"}`}
               >
                 {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                 {confirmLabel}

@@ -114,7 +114,7 @@ export function RejectModal({
             type="button"
             onClick={confirm}
             disabled={loading}
-            className="btn btn-red"
+            className="btn btn-danger"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             Confirm rejection
