@@ -34,9 +34,9 @@ const RevenueArea = dynamic(
 
 const STATUS_LABELS: Record<string, string> = {
   pending: "Pending",
-  confirmed: "Confirmed",
+  confirmed: "Processed",
   packed: "Packed",
-  out_for_delivery: "Out for delivery",
+  out_for_delivery: "Dispatched",
   delivered: "Delivered",
   cancelled: "Cancelled",
 };

@@ -35,11 +35,13 @@ export function formatDateTime(date: Date | string): string {
   }).format(new Date(date));
 }
 
+// Display labels are the rename from the owner's spec. The underlying
+// enum values stay the same so existing orders keep working.
 export const ORDER_STATUS_LABELS: Record<string, string> = {
   pending: "Pending",
-  confirmed: "Confirmed",
+  confirmed: "Processed",
   packed: "Packed",
-  out_for_delivery: "Out for Delivery",
+  out_for_delivery: "Dispatched",
   delivered: "Delivered",
   cancelled: "Cancelled",
 };

@@ -15,10 +15,10 @@ const fetcher = (url: string) =>
   fetch(url).then((r) => r.json()).then((d) => d.data);
 
 const STATUS_ACTIONS: Record<string, { label: string; next: string }> = {
-  pending: { label: "Confirm order", next: "confirmed" },
+  pending: { label: "Mark processed", next: "confirmed" },
   confirmed: { label: "Mark packed", next: "packed" },
-  packed: { label: "Mark out for delivery", next: "out_for_delivery" },
-  out_for_delivery: { label: "Mark delivered", next: "delivered" },
+  packed: { label: "Mark dispatched", next: "out_for_delivery" },
+  out_for_delivery: { label: "Confirm delivered", next: "delivered" },
 };
 
 export default function WholesaleOrderDetailPage({

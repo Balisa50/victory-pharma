@@ -24,9 +24,9 @@ const STATUS_FILTERS = [
 const STATUS_LABELS: Record<string, string> = {
   "": "All",
   pending: "Pending",
-  confirmed: "Confirmed",
+  confirmed: "Processed",
   packed: "Packed",
-  out_for_delivery: "Out for delivery",
+  out_for_delivery: "Dispatched",
   delivered: "Delivered",
   cancelled: "Cancelled",
 };
