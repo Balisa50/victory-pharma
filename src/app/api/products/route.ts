@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
   // adminView (shows unavailable products) is honoured for admins only.
   const adminView =
     searchParams.get("adminView") === "true" &&
-    session.user.role === "wholesale_admin";
+    (session.user.role === "wholesale_admin" || session.user.role === "manager");
 
   const where = {
     deletedAt: null,
@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const session = await auth();
-  if (session?.user?.role !== "wholesale_admin") {
+  if ((session?.user?.role !== "wholesale_admin" && session?.user?.role !== "manager")) {
     return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
   }
 

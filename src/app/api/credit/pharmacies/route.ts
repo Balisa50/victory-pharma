@@ -5,7 +5,8 @@ import { prisma } from "@/lib/db";
 /** GET: list all retail pharmacies with their credit balance summary. */
 export async function GET() {
   const session = await auth();
-  if (session?.user?.role !== "wholesale_admin") {
+  const role = session?.user?.role;
+  if (role !== "wholesale_admin" && role !== "manager") {
     return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
   }
 
@@ -25,12 +26,17 @@ export async function GET() {
 
   const ids = pharmacies.map((p) => p.id);
 
-  // Total credit ordered per pharmacy
+  // Total credit ordered per pharmacy + oldest unpaid credit order date
   const creditOrders = await prisma.order.groupBy({
     by: ["retailPharmacyId"],
-    where: { retailPharmacyId: { in: ids }, isCredit: true },
+    where: {
+      retailPharmacyId: { in: ids },
+      isCredit: true,
+      status: { not: "cancelled" },
+    },
     _sum: { totalAmount: true },
     _count: { _all: true },
+    _min: { createdAt: true },
   });
 
   // Total credit payments made per pharmacy
@@ -43,13 +49,33 @@ export async function GET() {
   const orderMap = new Map(creditOrders.map((r) => [r.retailPharmacyId, r]));
   const paymentMap = new Map(creditPayments.map((r) => [r.retailPharmacyId, r]));
 
+  const now = Date.now();
   const data = pharmacies
     .map((p) => {
-      const ordered = Number(orderMap.get(p.id)?._sum.totalAmount ?? 0);
+      const o = orderMap.get(p.id);
+      const ordered = Number(o?._sum.totalAmount ?? 0);
       const paid = Number(paymentMap.get(p.id)?._sum.amount ?? 0);
       const outstanding = Math.max(0, ordered - paid);
-      const creditOrderCount = orderMap.get(p.id)?._count._all ?? 0;
-      return { ...p, totalCreditOrdered: ordered, totalPaid: paid, outstanding, creditOrderCount };
+      const creditOrderCount = o?._count._all ?? 0;
+      const oldestCreditAt = o?._min.createdAt ?? null;
+      const oldestCreditDays =
+        oldestCreditAt && outstanding > 0
+          ? Math.floor((now - new Date(oldestCreditAt).getTime()) / 86_400_000)
+          : 0;
+      // Alert flags: overdue when oldest unpaid credit is older than 30 days; high
+      // debt when outstanding exceeds 25,000 (currency units).
+      const overdue = outstanding > 0 && oldestCreditDays > 30;
+      const highDebt = outstanding >= 25000;
+      return {
+        ...p,
+        totalCreditOrdered: ordered,
+        totalPaid: paid,
+        outstanding,
+        creditOrderCount,
+        oldestCreditDays,
+        overdue,
+        highDebt,
+      };
     })
     .sort((a, b) => b.outstanding - a.outstanding);
 

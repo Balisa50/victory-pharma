@@ -8,7 +8,7 @@ import { applyDiscountSchema } from "@/lib/validation/discount";
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await auth();
-  if (session?.user?.role !== "wholesale_admin") {
+  if ((session?.user?.role !== "wholesale_admin" && session?.user?.role !== "manager")) {
     return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
   }
 
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await auth();
-  if (session?.user?.role !== "wholesale_admin") {
+  if ((session?.user?.role !== "wholesale_admin" && session?.user?.role !== "manager")) {
     return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
   }
   const order = await prisma.order.findUnique({

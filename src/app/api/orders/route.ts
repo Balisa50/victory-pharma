@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   const session = await auth();
   if (!session?.user) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
 
-  const isAdmin = session.user.role === "wholesale_admin";
+  const isAdmin = (session.user.role === "wholesale_admin" || session.user.role === "manager");
   const { searchParams } = req.nextUrl;
   const status = searchParams.get("status");
   const page = Math.max(1, Number(searchParams.get("page") ?? "1"));
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { items, isCredit, notes } = parsed.data;
+  const { items, isCredit, notes, deliveryAddress } = parsed.data;
 
   try {
     const order = await prisma.$transaction(async (tx) => {
@@ -71,6 +71,16 @@ export async function POST(req: NextRequest) {
 
       if (products.length !== productIds.length) {
         throw new Error("One or more products are no longer available");
+      }
+
+      // MOQ enforcement: each line must meet the product's minimum order quantity (in packs).
+      for (const item of items) {
+        const product = products.find((p) => p.id === item.productId)!;
+        if (item.quantity < product.minOrderQuantity) {
+          throw new Error(
+            `${product.name} has a minimum order of ${product.minOrderQuantity} ${item.packLevel}${product.minOrderQuantity === 1 ? "" : "s"}`
+          );
+        }
       }
 
       // Convert every line into base units; total demand per product.
@@ -112,6 +122,7 @@ export async function POST(req: NextRequest) {
           subtotal: totalAmount, // pre-discount; equals totalAmount until admin applies one
           isCredit: isCredit ?? false,
           notes: notes ?? null,
+          deliveryAddress: deliveryAddress ?? null,
           status: "pending",
           orderItems: {
             create: lines.map((l) => ({

@@ -9,7 +9,7 @@ export async function GET(
 ) {
   const { id } = await params;
   const session = await auth();
-  if (session?.user?.role !== "wholesale_admin") {
+  if ((session?.user?.role !== "wholesale_admin" && session?.user?.role !== "manager")) {
     return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
   }
 

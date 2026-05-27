@@ -9,6 +9,7 @@ datasource db {
 
 enum UserRole {
   wholesale_admin
+  manager
   retail_pharmacy
 }
 
@@ -115,6 +116,7 @@ model Product {
   warehouseUnits    Int     @default(0)
   stockUnits        Int     @default(0)
   lowStockThreshold Int     @default(10)
+  minOrderQuantity  Int     @default(1)   // MOQ in packs at the smallest sellable level
   allowBottleSale   Boolean @default(true)
   allowCartonSale   Boolean @default(false)
 
@@ -146,6 +148,7 @@ enum StockActionType {
   STOCK_ADD        // received into warehouse
   STOCK_TRANSFER   // moved from warehouse to sales inventory
   ORDER_DEDUCTION  // consumed by a customer order (sales)
+  ORDER_VOID       // restored to sales inventory after a voided/cancelled order
   MANUAL_ADJUST    // signed correction (warehouse)
 }
 
@@ -164,6 +167,11 @@ model Order {
   // Pharmacy balance is computed across all credit orders and credit payments.
   isCredit          Boolean     @default(false)
   notes             String?
+  deliveryFee       Decimal     @default(0) @db.Decimal(12, 2)
+  deliveryAddress   String?
+  voidedAt          DateTime?
+  voidReason        String?
+  voidedBy          String?
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
 

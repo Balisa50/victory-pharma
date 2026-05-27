@@ -19,7 +19,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await auth();
-  if (session?.user?.role !== "wholesale_admin") {
+  if ((session?.user?.role !== "wholesale_admin" && session?.user?.role !== "manager")) {
     return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
   }
 
@@ -46,7 +46,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await auth();
-  if (session?.user?.role !== "wholesale_admin") {
+  if ((session?.user?.role !== "wholesale_admin" && session?.user?.role !== "manager")) {
     return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
   }
 

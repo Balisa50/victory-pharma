@@ -12,7 +12,8 @@ import { unitsForPack } from "@/lib/packaging";
 
 async function requireAdmin() {
   const session = await auth();
-  if (session?.user?.role !== "wholesale_admin") return null;
+  const role = session?.user?.role;
+  if (role !== "wholesale_admin" && role !== "manager") return null;
   return session;
 }
 

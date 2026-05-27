@@ -29,6 +29,11 @@ export const createProductSchema = z.object({
     .int()
     .min(0, "Threshold cannot be negative")
     .default(10),
+  minOrderQuantity: z
+    .number()
+    .int()
+    .min(1, "Minimum order quantity must be at least 1")
+    .default(1),
   allowBottleSale: z.boolean().default(true),
   allowCartonSale: z.boolean().default(false),
 });

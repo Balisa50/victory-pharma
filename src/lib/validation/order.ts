@@ -12,6 +12,7 @@ export const createOrderSchema = z.object({
     .min(1, "Cart cannot be empty"),
   isCredit: z.boolean().optional(),
   notes: z.string().max(500).optional(),
+  deliveryAddress: z.string().max(300).optional(),
 });
 
 export const updateOrderStatusSchema = z.object({

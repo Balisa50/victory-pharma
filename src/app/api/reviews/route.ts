@@ -6,7 +6,7 @@ import { sanitizeText } from "@/lib/utils/sanitize";
 
 export async function GET(_req: NextRequest) {
   const session = await auth();
-  if (session?.user?.role !== "wholesale_admin") {
+  if ((session?.user?.role !== "wholesale_admin" && session?.user?.role !== "manager")) {
     return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
   }
 

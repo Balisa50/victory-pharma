@@ -17,7 +17,7 @@ type PaymentMethodRow = { method: string; total: number; count: number };
 /** GET: admin reports — monthly revenue, top products/pharmacies, status mix, expenses, profit, credit. */
 export async function GET() {
   const session = await auth();
-  if (session?.user?.role !== "wholesale_admin") {
+  if ((session?.user?.role !== "wholesale_admin" && session?.user?.role !== "manager")) {
     return NextResponse.json(
       { success: false, error: "Forbidden" },
       { status: 403 }

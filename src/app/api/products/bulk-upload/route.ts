@@ -18,7 +18,7 @@ export interface BulkProductRow {
 /** POST: parse an uploaded Excel file and return a preview. */
 export async function POST(req: NextRequest) {
   const session = await auth();
-  if (session?.user?.role !== "wholesale_admin") {
+  if ((session?.user?.role !== "wholesale_admin" && session?.user?.role !== "manager")) {
     return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
   }
 

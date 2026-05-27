@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
   const status = searchParams.get("status") as ComplaintStatus | null;
 
-  const isAdmin = session.user.role === "wholesale_admin";
+  const isAdmin = (session.user.role === "wholesale_admin" || session.user.role === "manager");
 
   const complaints = await prisma.complaint.findMany({
     where: {

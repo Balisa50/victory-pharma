@@ -5,7 +5,7 @@ import * as XLSX from "xlsx";
 /** GET: download the blank Excel import template. */
 export async function GET() {
   const session = await auth();
-  if (session?.user?.role !== "wholesale_admin") {
+  if ((session?.user?.role !== "wholesale_admin" && session?.user?.role !== "manager")) {
     return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
   }
 

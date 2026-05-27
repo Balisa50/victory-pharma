@@ -21,6 +21,7 @@ import {
   ShieldCheck,
   CreditCard,
   Receipt,
+  History,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -28,6 +29,7 @@ const NAV_ITEMS = [
   { href: "/wholesale/verification", label: "Verification", icon: ShieldCheck },
   { href: "/wholesale/products", label: "Products", icon: Package },
   { href: "/wholesale/warehouse", label: "Warehouse", icon: Warehouse },
+  { href: "/wholesale/stock-history", label: "Stock History", icon: History },
   { href: "/wholesale/orders", label: "Orders", icon: ClipboardList },
   { href: "/wholesale/credit", label: "Credit Ledger", icon: CreditCard },
   { href: "/wholesale/expenses", label: "Expenses", icon: Receipt },

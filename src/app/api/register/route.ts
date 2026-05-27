@@ -34,9 +34,9 @@ export async function POST(req: NextRequest) {
     role,
   } = parsed.data;
 
-  if (role === "wholesale_admin") {
+  if (role === "wholesale_admin" || role === "manager") {
     return NextResponse.json(
-      { success: false, error: "Cannot self-register as wholesale admin" },
+      { success: false, error: "Cannot self-register with this role" },
       { status: 403 }
     );
   }

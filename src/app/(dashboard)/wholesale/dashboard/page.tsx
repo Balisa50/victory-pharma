@@ -1,12 +1,24 @@
 "use client";
 
 import useSWR from "swr";
+import Link from "next/link";
 import dynamic from "next/dynamic";
+import { AlertTriangle } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { EmptyState } from "@/components/shared/EmptyState";
 import type { WholesaleDashboardData } from "@/types";
 import { useMemo } from "react";
+
+type CreditAlertRow = {
+  id: string;
+  name: string;
+  pharmacyName: string | null;
+  outstanding: number;
+  oldestCreditDays: number;
+  overdue: boolean;
+  highDebt: boolean;
+};
 
 // Charts (recharts) load on demand so they stay out of the initial bundle.
 const RevenueSparkline = dynamic(
@@ -26,6 +38,15 @@ export default function WholesaleDashboard() {
     "/api/dashboard/wholesale",
     fetcher,
     { refreshInterval: 30000 }
+  );
+
+  const { data: creditRows } = useSWR<CreditAlertRow[]>(
+    "/api/credit/pharmacies",
+    fetcher,
+    { refreshInterval: 60000 }
+  );
+  const creditAlerts = (creditRows ?? []).filter(
+    (r) => r.overdue || r.highDebt
   );
 
   const greeting = useMemo(() => {
@@ -82,6 +103,56 @@ export default function WholesaleDashboard() {
       </header>
 
       <div className="space-y-8 px-8 py-8 md:px-12">
+        {/* ── CREDIT ALERTS ── */}
+        {creditAlerts.length > 0 && (
+          <section className="overflow-hidden rounded-2xl border border-[hsl(var(--red))]/30 bg-[hsl(var(--red))]/5">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[hsl(var(--red))]/20 px-6 py-3.5">
+              <div className="flex items-center gap-2.5">
+                <AlertTriangle className="h-4 w-4 text-[hsl(var(--red-2))]" />
+                <p className="eyebrow text-[hsl(var(--red-2))]">
+                  Credit alerts · {creditAlerts.length} pharmac{creditAlerts.length === 1 ? "y" : "ies"} need attention
+                </p>
+              </div>
+              <Link
+                href="/wholesale/credit"
+                className="text-[12px] font-medium text-[hsl(var(--red-2))] underline-offset-4 hover:underline"
+              >
+                Open credit ledger →
+              </Link>
+            </div>
+            <ul className="divide-y divide-[hsl(var(--red))]/15">
+              {creditAlerts.slice(0, 4).map((a) => (
+                <li key={a.id} className="flex flex-wrap items-center justify-between gap-3 px-6 py-3">
+                  <div>
+                    <p className="text-[14px] font-medium text-[hsl(var(--navy))]">
+                      {a.pharmacyName ?? a.name}
+                    </p>
+                    <p className="text-[11.5px] text-neutral-500">
+                      {a.overdue && (
+                        <span className="font-medium text-[hsl(var(--red-2))]">
+                          {a.oldestCreditDays} days overdue
+                        </span>
+                      )}
+                      {a.overdue && a.highDebt && " · "}
+                      {a.highDebt && (
+                        <span className="font-medium text-[hsl(var(--gold))]">
+                          High debt
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[11px] uppercase tracking-[0.16em] text-neutral-400">Outstanding</p>
+                    <p className="display text-[20px] text-[hsl(var(--red-2))]">
+                      {formatCurrency(a.outstanding)}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         {/* ── ASYMMETRIC HERO STATS ── */}
         <section className="grid gap-5 lg:grid-cols-3">
           {/* Primary: Revenue */}

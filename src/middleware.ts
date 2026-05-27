@@ -5,8 +5,18 @@ const PUBLIC_ROUTES = ["/", "/login", "/register"];
 const PENDING_ROUTE = "/pending-approval";
 
 function dashboardFor(role: string) {
-  return role === "wholesale_admin" ? "/wholesale/dashboard" : "/retail/catalog";
+  return role === "wholesale_admin" || role === "manager"
+    ? "/wholesale/dashboard"
+    : "/retail/catalog";
 }
+
+// Pages in /wholesale that the manager role can NOT enter — admin-only spaces.
+const MANAGER_BLOCKED = [
+  "/wholesale/users",
+  "/wholesale/settings",
+  "/wholesale/news",
+  "/wholesale/contact",
+];
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;
@@ -55,8 +65,20 @@ export default auth((req) => {
     return NextResponse.redirect(new URL(PENDING_ROUTE, req.url));
   }
 
-  if (pathname.startsWith("/wholesale") && user.role !== "wholesale_admin") {
+  if (
+    pathname.startsWith("/wholesale") &&
+    user.role !== "wholesale_admin" &&
+    user.role !== "manager"
+  ) {
     return NextResponse.redirect(new URL("/retail/catalog", req.url));
+  }
+
+  // Managers see most of /wholesale but a few admin-only spaces are off limits.
+  if (
+    user.role === "manager" &&
+    MANAGER_BLOCKED.some((p) => pathname.startsWith(p))
+  ) {
+    return NextResponse.redirect(new URL("/wholesale/dashboard", req.url));
   }
 
   if (pathname.startsWith("/retail") && user.role !== "retail_pharmacy") {

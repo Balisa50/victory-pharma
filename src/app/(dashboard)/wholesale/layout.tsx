@@ -18,7 +18,7 @@ export default async function WholesaleLayout({
     where: { id: session.user.id },
     select: { role: true, status: true },
   });
-  if (account?.role !== "wholesale_admin" || account.status !== "active") {
+  if ((account?.role !== "wholesale_admin" && account?.role !== "manager") || account.status !== "active") {
     redirect("/login");
   }
 

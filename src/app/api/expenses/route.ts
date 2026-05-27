@@ -13,7 +13,7 @@ const createSchema = z.object({
 /** GET: list expenses with optional category + date range filters. */
 export async function GET(req: NextRequest) {
   const session = await auth();
-  if (session?.user?.role !== "wholesale_admin") {
+  if ((session?.user?.role !== "wholesale_admin" && session?.user?.role !== "manager")) {
     return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
   }
 
@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
 /** POST: create an expense. */
 export async function POST(req: NextRequest) {
   const session = await auth();
-  if (session?.user?.role !== "wholesale_admin") {
+  if ((session?.user?.role !== "wholesale_admin" && session?.user?.role !== "manager")) {
     return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
   }
 

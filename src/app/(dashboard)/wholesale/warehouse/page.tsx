@@ -15,7 +15,7 @@ import type { Product } from "@/types";
 type StockMovementRow = {
   id: string;
   productId: string;
-  actionType: "STOCK_ADD" | "STOCK_TRANSFER" | "ORDER_DEDUCTION" | "MANUAL_ADJUST";
+  actionType: "STOCK_ADD" | "STOCK_TRANSFER" | "ORDER_DEDUCTION" | "ORDER_VOID" | "MANUAL_ADJUST";
   quantity: number;
   note: string | null;
   createdAt: string;
@@ -31,6 +31,7 @@ const ACTION_LABELS: Record<StockMovementRow["actionType"], string> = {
   STOCK_ADD: "Received",
   STOCK_TRANSFER: "Transfer → Sales",
   ORDER_DEDUCTION: "Order",
+  ORDER_VOID: "Voided order",
   MANUAL_ADJUST: "Adjustment",
 };
 

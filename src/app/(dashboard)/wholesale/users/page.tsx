@@ -12,7 +12,7 @@ type UserRow = {
   name: string;
   email: string;
   phone: string;
-  role: "wholesale_admin" | "retail_pharmacy";
+  role: "wholesale_admin" | "manager" | "retail_pharmacy";
   status: "pending" | "active" | "rejected";
   pharmacyName: string | null;
   pharmacyId: string | null;
@@ -27,6 +27,7 @@ const fetcher = (url: string) =>
 const ROLE_FILTERS = [
   { key: "", label: "All" },
   { key: "retail_pharmacy", label: "Pharmacies" },
+  { key: "manager", label: "Managers" },
   { key: "wholesale_admin", label: "Admins" },
 ] as const;
 
@@ -38,6 +39,7 @@ const STATUS_STYLES: Record<UserRow["status"], string> = {
 
 const ROLE_LABEL: Record<UserRow["role"], string> = {
   wholesale_admin: "Admin",
+  manager: "Manager",
   retail_pharmacy: "Pharmacy",
 };
 

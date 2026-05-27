@@ -51,6 +51,7 @@ export function ProductModal({ product, onClose, onSaved }: Props) {
           bottlesPerCarton: product.bottlesPerCarton,
           stockUnits: product.stockUnits,
           lowStockThreshold: product.lowStockThreshold,
+          minOrderQuantity: product.minOrderQuantity ?? 1,
           allowBottleSale: product.allowBottleSale,
           allowCartonSale: product.allowCartonSale,
         }
@@ -61,6 +62,7 @@ export function ProductModal({ product, onClose, onSaved }: Props) {
           bottlesPerCarton: 1,
           stockUnits: 0,
           lowStockThreshold: 10,
+          minOrderQuantity: 1,
           allowBottleSale: true,
           allowCartonSale: false,
         },
@@ -251,6 +253,18 @@ export function ProductModal({ product, onClose, onSaved }: Props) {
             />
           </Field>
         </div>
+
+        <Field
+          label="Minimum order quantity (packs)"
+          error={errors.minOrderQuantity?.message}
+        >
+          <input
+            {...register("minOrderQuantity", { valueAsNumber: true })}
+            type="number"
+            min="1"
+            className="field"
+          />
+        </Field>
 
         <Field label="Expiry date (optional)" error={errors.expiryDate?.message}>
           <input {...register("expiryDate")} type="date" className="field" />
