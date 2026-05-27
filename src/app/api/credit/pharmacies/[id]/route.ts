@@ -5,15 +5,16 @@ import { prisma } from "@/lib/db";
 /** GET: full account statement for one retail pharmacy. */
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await auth();
   if (session?.user?.role !== "wholesale_admin") {
     return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
   }
 
   const pharmacy = await prisma.user.findUnique({
-    where: { id: params.id, role: "retail_pharmacy" },
+    where: { id: id, role: "retail_pharmacy" },
     select: {
       id: true,
       name: true,
@@ -31,12 +32,12 @@ export async function GET(
 
   const [creditOrders, creditPayments] = await Promise.all([
     prisma.order.findMany({
-      where: { retailPharmacyId: params.id, isCredit: true },
+      where: { retailPharmacyId: id, isCredit: true },
       include: { orderItems: true, receipt: true },
       orderBy: { createdAt: "desc" },
     }),
     prisma.creditPayment.findMany({
-      where: { retailPharmacyId: params.id },
+      where: { retailPharmacyId: id },
       orderBy: { createdAt: "desc" },
     }),
   ]);

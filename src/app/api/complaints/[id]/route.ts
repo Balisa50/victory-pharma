@@ -4,7 +4,8 @@ import { prisma } from "@/lib/db";
 import { updateComplaintSchema } from "@/lib/validation/complaint";
 import { sanitizeText } from "@/lib/utils/sanitize";
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const session = await auth();
   if (session?.user?.role !== "wholesale_admin") {
     return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
@@ -17,7 +18,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 
   const complaint = await prisma.complaint.update({
-    where: { id: params.id },
+    where: { id: id },
     data: {
       status: parsed.data.status,
       internalNotes: parsed.data.internalNotes ? sanitizeText(parsed.data.internalNotes) : undefined,

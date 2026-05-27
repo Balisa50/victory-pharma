@@ -5,7 +5,8 @@ import { prisma } from "@/lib/db";
 import { applyDiscountSchema } from "@/lib/validation/discount";
 
 /** POST: apply or replace a discount on an order. Admin only. */
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const session = await auth();
   if (session?.user?.role !== "wholesale_admin") {
     return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
@@ -21,7 +22,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   }
 
   const order = await prisma.order.findUnique({
-    where: { id: params.id },
+    where: { id: id },
     include: { payment: true },
   });
   if (!order) {
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const total = Math.max(0, subtotal - discountAmount);
 
   const updated = await prisma.order.update({
-    where: { id: params.id },
+    where: { id: id },
     data: {
       subtotal: new Prisma.Decimal(subtotal),
       discountType: type,
@@ -64,13 +65,14 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 }
 
 /** DELETE: clear an applied discount. Admin only. */
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const session = await auth();
   if (session?.user?.role !== "wholesale_admin") {
     return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
   }
   const order = await prisma.order.findUnique({
-    where: { id: params.id },
+    where: { id: id },
     include: { payment: true },
   });
   if (!order) {
@@ -84,7 +86,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
   }
   const subtotal = order.subtotal ?? order.totalAmount;
   const updated = await prisma.order.update({
-    where: { id: params.id },
+    where: { id: id },
     data: {
       discountType: null,
       discountValue: null,

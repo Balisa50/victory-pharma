@@ -13,7 +13,8 @@ const ALLOWED_TRANSITIONS: Record<string, string[]> = {
   cancelled: [],
 };
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const session = await auth();
   if (session?.user?.role !== "wholesale_admin") {
     return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
@@ -25,7 +26,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     return NextResponse.json({ success: false, error: "Invalid status" }, { status: 422 });
   }
 
-  const order = await prisma.order.findUnique({ where: { id: params.id }, include: { payment: true } });
+  const order = await prisma.order.findUnique({ where: { id: id }, include: { payment: true } });
   if (!order) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
 
   const allowed = ALLOWED_TRANSITIONS[order.status];
@@ -45,18 +46,18 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   const updated = await prisma.$transaction(async (tx) => {
     const updatedOrder = await tx.order.update({
-      where: { id: params.id },
+      where: { id: id },
       data: { status: parsed.data.status },
       include: { payment: true, orderItems: true, retailPharmacy: { select: { id: true, name: true, pharmacyName: true, phone: true, email: true } } },
     });
 
     await tx.orderStatusHistory.create({
-      data: { orderId: params.id, status: parsed.data.status, changedBy: session.user.id },
+      data: { orderId: id, status: parsed.data.status, changedBy: session.user.id },
     });
 
     // A confirmed order earns its receipt (whichever comes first: this or payment).
     if (parsed.data.status === "confirmed") {
-      await ensureReceipt(tx, params.id);
+      await ensureReceipt(tx, id);
     }
 
     return updatedOrder;

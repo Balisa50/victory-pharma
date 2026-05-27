@@ -3,19 +3,21 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { updateProductSchema } from "@/lib/validation/product";
 
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const session = await auth();
   if (!session?.user) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
 
   const product = await prisma.product.findFirst({
-    where: { id: params.id, deletedAt: null },
+    where: { id: id, deletedAt: null },
   });
 
   if (!product) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
   return NextResponse.json({ success: true, data: product });
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const session = await auth();
   if (session?.user?.role !== "wholesale_admin") {
     return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
@@ -31,7 +33,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 
   const product = await prisma.product.update({
-    where: { id: params.id },
+    where: { id: id },
     data: {
       ...parsed.data,
       expiryDate: parsed.data.expiryDate ? new Date(parsed.data.expiryDate) : undefined,
@@ -41,14 +43,15 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   return NextResponse.json({ success: true, data: product });
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const session = await auth();
   if (session?.user?.role !== "wholesale_admin") {
     return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
   }
 
   await prisma.product.update({
-    where: { id: params.id },
+    where: { id: id },
     data: { deletedAt: new Date(), availabilityStatus: false },
   });
 

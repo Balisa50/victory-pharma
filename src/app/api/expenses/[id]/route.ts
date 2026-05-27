@@ -12,8 +12,9 @@ const updateSchema = z.object({
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await auth();
   if (session?.user?.role !== "wholesale_admin") {
     return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
@@ -29,7 +30,7 @@ export async function PATCH(
   }
 
   const expense = await prisma.expense.update({
-    where: { id: params.id },
+    where: { id: id },
     data: {
       ...(parsed.data.category ? { category: parsed.data.category } : {}),
       ...(parsed.data.amount ? { amount: parsed.data.amount } : {}),
@@ -43,13 +44,14 @@ export async function PATCH(
 
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const session = await auth();
   if (session?.user?.role !== "wholesale_admin") {
     return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
   }
 
-  await prisma.expense.delete({ where: { id: params.id } });
+  await prisma.expense.delete({ where: { id: id } });
   return NextResponse.json({ success: true });
 }
