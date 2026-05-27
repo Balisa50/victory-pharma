@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import useSWR from "swr";
-import { Search } from "lucide-react";
+import { Search, UserPlus } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { PageHeader, PageBody, Panel } from "@/components/shared/Editorial";
 import { EmptyState } from "@/components/shared/EmptyState";
+import { AddManagerModal } from "@/components/wholesale/AddManagerModal";
 
 type UserRow = {
   id: string;
@@ -46,12 +47,13 @@ const ROLE_LABEL: Record<UserRow["role"], string> = {
 export default function UsersPage() {
   const [role, setRole] = useState<"" | UserRow["role"]>("");
   const [search, setSearch] = useState("");
+  const [managerOpen, setManagerOpen] = useState(false);
 
   const params = new URLSearchParams({
     ...(role ? { role } : {}),
     ...(search.length >= 2 ? { search } : {}),
   });
-  const { data, isLoading } = useSWR(
+  const { data, isLoading, mutate } = useSWR(
     `/api/admin/users?${params}`,
     fetcher,
     { refreshInterval: 30000 }
@@ -66,6 +68,12 @@ export default function UsersPage() {
         title="System"
         accent="users"
         description="Every account on the platform, filterable by role and status."
+        action={
+          <button onClick={() => setManagerOpen(true)} className="btn btn-navy">
+            <UserPlus className="h-4 w-4" />
+            Add manager
+          </button>
+        }
       />
 
       <PageBody>
@@ -171,6 +179,16 @@ export default function UsersPage() {
           </div>
         </Panel>
       </PageBody>
+
+      {managerOpen && (
+        <AddManagerModal
+          onClose={() => setManagerOpen(false)}
+          onDone={() => {
+            setManagerOpen(false);
+            mutate();
+          }}
+        />
+      )}
     </>
   );
 }
