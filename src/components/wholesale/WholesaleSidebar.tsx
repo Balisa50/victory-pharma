@@ -19,6 +19,8 @@ import {
   LogOut,
   Pill,
   ShieldCheck,
+  CreditCard,
+  Receipt,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -27,6 +29,8 @@ const NAV_ITEMS = [
   { href: "/wholesale/products", label: "Products", icon: Package },
   { href: "/wholesale/warehouse", label: "Warehouse", icon: Warehouse },
   { href: "/wholesale/orders", label: "Orders", icon: ClipboardList },
+  { href: "/wholesale/credit", label: "Credit Ledger", icon: CreditCard },
+  { href: "/wholesale/expenses", label: "Expenses", icon: Receipt },
   { href: "/wholesale/reviews", label: "Reviews", icon: Star },
   { href: "/wholesale/complaints", label: "Complaints", icon: MessageSquareWarning },
   { href: "/wholesale/reports", label: "Reports", icon: BarChart3 },

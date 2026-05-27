@@ -16,6 +16,8 @@ export default function CartPage() {
   const { state, total } = useCart();
   const { removeItem, updateQuantity, clearCart } = useCartActions();
   const [loading, setLoading] = useState(false);
+  const [isCredit, setIsCredit] = useState(false);
+  const [notes, setNotes] = useState("");
 
   async function handleCheckout() {
     if (state.items.length === 0) return;
@@ -30,6 +32,8 @@ export default function CartPage() {
             packLevel: i.packLevel,
             quantity: i.quantity,
           })),
+          isCredit,
+          notes: notes || undefined,
         }),
       });
       const json = (await res.json()) as {
@@ -176,6 +180,34 @@ export default function CartPage() {
                   {formatCurrency(total)}
                 </span>
               </div>
+              {/* Credit option */}
+              <div className="mb-4 rounded-lg border border-neutral-200 px-4 py-3">
+                <label className="flex cursor-pointer items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[13px] font-medium text-[hsl(var(--navy))]">
+                      Order on credit
+                    </p>
+                    <p className="text-[11.5px] text-neutral-400">
+                      Pay later — balance tracked in your account.
+                    </p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={isCredit}
+                    onChange={(e) => setIsCredit(e.target.checked)}
+                    className="h-4 w-4 rounded accent-[hsl(var(--navy))]"
+                  />
+                </label>
+              </div>
+
+              <textarea
+                rows={2}
+                placeholder="Order notes (optional)…"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="mb-3 w-full resize-none rounded-lg border border-neutral-200 px-3 py-2 text-[13px] placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--navy))]/20"
+              />
+
               <button
                 onClick={handleCheckout}
                 disabled={loading}
@@ -186,7 +218,7 @@ export default function CartPage() {
                 ) : (
                   <ShoppingBag className="h-4 w-4" />
                 )}
-                {loading ? "Placing order..." : "Proceed to checkout"}
+                {loading ? "Placing order..." : isCredit ? "Place credit order" : "Proceed to checkout"}
               </button>
             </div>
           </div>

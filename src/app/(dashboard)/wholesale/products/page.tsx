@@ -4,7 +4,8 @@ import { useState } from "react";
 import Image from "next/image";
 import useSWR from "swr";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Pill } from "lucide-react";
+import Link from "next/link";
+import { Plus, Pencil, Trash2, Pill, Upload } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
@@ -42,16 +43,25 @@ export default function ProductsPage() {
         accent="catalog"
         description="Everything retail partners can order. Keep stock and pricing current."
         action={
-          <button
-            onClick={() => {
-              setEditing(null);
-              setModalOpen(true);
-            }}
-            className="btn btn-red"
-          >
-            <Plus className="h-4 w-4" />
-            Add product
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/wholesale/products/bulk-upload"
+              className="flex items-center gap-1.5 rounded-lg border border-[hsl(var(--navy))]/20 px-3.5 py-2 text-[13px] font-semibold text-[hsl(var(--navy))] transition-colors hover:bg-[hsl(var(--offwhite))]"
+            >
+              <Upload className="h-4 w-4" />
+              Bulk upload
+            </Link>
+            <button
+              onClick={() => {
+                setEditing(null);
+                setModalOpen(true);
+              }}
+              className="btn btn-red"
+            >
+              <Plus className="h-4 w-4" />
+              Add product
+            </button>
+          </div>
         }
       />
 

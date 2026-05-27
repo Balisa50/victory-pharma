@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { items } = parsed.data;
+  const { items, isCredit, notes } = parsed.data;
 
   try {
     const order = await prisma.$transaction(async (tx) => {
@@ -110,6 +110,8 @@ export async function POST(req: NextRequest) {
           retailPharmacyId: session.user.id,
           totalAmount,
           subtotal: totalAmount, // pre-discount; equals totalAmount until admin applies one
+          isCredit: isCredit ?? false,
+          notes: notes ?? null,
           status: "pending",
           orderItems: {
             create: lines.map((l) => ({
