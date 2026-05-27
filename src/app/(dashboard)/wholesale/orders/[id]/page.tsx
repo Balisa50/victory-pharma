@@ -3,12 +3,14 @@
 import { use, useState } from "react";
 import useSWR from "swr";
 import { toast } from "sonner";
-import { Loader2, Tag } from "lucide-react";
+import { Loader2, Tag, Truck } from "lucide-react";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { OrderTimeline } from "@/components/shared/OrderTimeline";
 import { PageHeader, PageBody, Panel } from "@/components/shared/Editorial";
 import { DiscountModal } from "./components/DiscountModal";
+import { VoidModal } from "./components/VoidModal";
+import { DeliveryFeeModal } from "./components/DeliveryFeeModal";
 import type { OrderWithRelations } from "@/types";
 
 const fetcher = (url: string) =>
@@ -36,6 +38,8 @@ export default function WholesaleOrderDetailPage({
   });
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [discountOpen, setDiscountOpen] = useState(false);
+  const [voidOpen, setVoidOpen] = useState(false);
+  const [deliveryOpen, setDeliveryOpen] = useState(false);
 
   async function updateStatus(status: string) {
     setActionLoading(status);
@@ -135,16 +139,29 @@ export default function WholesaleOrderDetailPage({
                 {nextAction.label}
               </button>
             )}
-            {order.payment?.status !== "confirmed" && (
+            {order.payment?.status !== "confirmed" &&
+              !["delivered", "cancelled"].includes(order.status) && (
+                <button
+                  type="button"
+                  onClick={() => setDiscountOpen(true)}
+                  className="btn btn-ghost"
+                >
+                  <Tag className="h-4 w-4" />
+                  {Number(order.discountAmount) > 0
+                    ? "Edit discount"
+                    : "Apply discount"}
+                </button>
+              )}
+            {!["delivered", "cancelled"].includes(order.status) && (
               <button
                 type="button"
-                onClick={() => setDiscountOpen(true)}
+                onClick={() => setDeliveryOpen(true)}
                 className="btn btn-ghost"
               >
-                <Tag className="h-4 w-4" />
-                {Number(order.discountAmount) > 0
-                  ? "Edit discount"
-                  : "Apply discount"}
+                <Truck className="h-4 w-4" />
+                {Number(order.deliveryFee) > 0
+                  ? "Edit delivery fee"
+                  : "Set delivery fee"}
               </button>
             )}
             {order.payment &&
@@ -160,16 +177,13 @@ export default function WholesaleOrderDetailPage({
                   Confirm payment
                 </button>
               )}
-            {["pending", "confirmed"].includes(order.status) && (
+            {["pending", "confirmed", "packed", "out_for_delivery"].includes(order.status) && (
               <button
-                onClick={() => updateStatus("cancelled")}
+                onClick={() => setVoidOpen(true)}
                 disabled={!!actionLoading}
                 className="btn btn-ghost"
               >
-                {actionLoading === "cancelled" && (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                )}
-                Cancel order
+                Void order
               </button>
             )}
           </>
@@ -177,6 +191,26 @@ export default function WholesaleOrderDetailPage({
       />
 
       <PageBody>
+        {order.status === "cancelled" && (
+          <div className="mb-5 rounded-2xl border border-[hsl(var(--red))]/30 bg-[hsl(var(--red))]/5 px-6 py-4">
+            <p className="eyebrow mb-1 text-[hsl(var(--red-2))]">
+              Voided · {order.voidedAt ? formatDateTime(order.voidedAt) : ""}
+            </p>
+            <p className="text-[13.5px] text-[hsl(var(--navy))]">
+              {order.voidReason ?? "No reason recorded."}
+            </p>
+            <p className="mt-1 text-[11.5px] text-neutral-500">
+              Stock returned to sales inventory. This order is locked.
+            </p>
+          </div>
+        )}
+        {order.status === "delivered" && (
+          <div className="mb-5 rounded-2xl border border-[hsl(var(--green))]/30 bg-[hsl(var(--green))]/5 px-6 py-3">
+            <p className="text-[12.5px] text-[hsl(var(--navy))]">
+              Delivered — this order is locked from further changes.
+            </p>
+          </div>
+        )}
         <div className="grid gap-5 lg:grid-cols-3">
           <div className="space-y-5 lg:col-span-2">
             {/* Items */}
@@ -244,12 +278,27 @@ export default function WholesaleOrderDetailPage({
                       </tr>
                     </>
                   )}
+                  {Number(order.deliveryFee) > 0 && (
+                    <tr>
+                      <td
+                        colSpan={3}
+                        className="px-4 pt-1 text-right text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-500"
+                      >
+                        Delivery fee
+                      </td>
+                      <td className="px-6 pt-1 text-right text-[13.5px] text-neutral-600 md:px-7">
+                        {formatCurrency(Number(order.deliveryFee))}
+                      </td>
+                    </tr>
+                  )}
                   <tr>
                     <td
                       colSpan={3}
                       className="px-4 pt-4 text-right text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-400"
                     >
-                      {Number(order.discountAmount) > 0 ? "Final total" : "Total"}
+                      {Number(order.discountAmount) > 0 || Number(order.deliveryFee) > 0
+                        ? "Final total"
+                        : "Total"}
                     </td>
                     <td className="px-6 pt-4 text-right md:px-7">
                       <span
@@ -325,6 +374,30 @@ export default function WholesaleOrderDetailPage({
           </div>
         </div>
       </PageBody>
+
+      {voidOpen && (
+        <VoidModal
+          orderId={order.id}
+          onClose={() => setVoidOpen(false)}
+          onDone={() => {
+            setVoidOpen(false);
+            mutate();
+          }}
+        />
+      )}
+
+      {deliveryOpen && (
+        <DeliveryFeeModal
+          orderId={order.id}
+          initialFee={Number(order.deliveryFee ?? 0)}
+          initialAddress={order.deliveryAddress ?? null}
+          onClose={() => setDeliveryOpen(false)}
+          onDone={() => {
+            setDeliveryOpen(false);
+            mutate();
+          }}
+        />
+      )}
 
       {discountOpen && (
         <DiscountModal

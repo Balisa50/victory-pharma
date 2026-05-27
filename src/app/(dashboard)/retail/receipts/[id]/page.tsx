@@ -31,6 +31,7 @@ type ReceiptData = {
     discountType: string | null;
     discountValue: unknown;
     discountAmount: unknown;
+    deliveryFee: unknown;
     orderItems: OrderItem[];
     payment: { method: string; status: string; amount: unknown } | null;
   };
@@ -181,6 +182,11 @@ export default function ReceiptDetailPage({
               discountValue={
                 receipt.order.discountValue != null
                   ? Number(receipt.order.discountValue)
+                  : null
+              }
+              deliveryFee={
+                receipt.order.deliveryFee != null
+                  ? Number(receipt.order.deliveryFee)
                   : null
               }
               paymentMethod={receipt.order.payment?.method ?? null}

@@ -7,10 +7,10 @@ import { ensureReceipt } from "@/lib/receipts/generateReceipt";
 const ALLOWED_TRANSITIONS: Record<string, string[]> = {
   pending: ["confirmed", "cancelled"],
   confirmed: ["packed", "cancelled"],
-  packed: ["out_for_delivery"],
-  out_for_delivery: ["delivered"],
-  delivered: [],
-  cancelled: [],
+  packed: ["out_for_delivery", "cancelled"],
+  out_for_delivery: ["delivered", "cancelled"],
+  delivered: [], // locked
+  cancelled: [], // locked
 };
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

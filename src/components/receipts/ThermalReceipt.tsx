@@ -24,6 +24,8 @@ export type ThermalReceiptProps = {
   /** "percentage" or "fixed" — used to annotate the discount line. */
   discountType?: string | null;
   discountValue?: number | null;
+  /** Optional delivery fee added on top of (subtotal - discount). */
+  deliveryFee?: number | null;
   paymentMethod: string | null;
   paid: boolean;
   contactPhone: string;
@@ -48,12 +50,14 @@ export function ThermalReceipt({
   discountAmount,
   discountType,
   discountValue,
+  deliveryFee,
   paymentMethod,
   paid,
   contactPhone,
 }: ThermalReceiptProps) {
   const discount = Number(discountAmount ?? 0);
-  const showBreakdown = discount > 0;
+  const fee = Number(deliveryFee ?? 0);
+  const showBreakdown = discount > 0 || fee > 0;
   return (
     <div className="thermal-receipt mx-auto bg-white font-mono text-[12px] leading-snug text-black">
       {/* Letterhead */}
@@ -119,17 +123,25 @@ export function ThermalReceipt({
         <>
           <div className="flex justify-between">
             <span>Subtotal</span>
-            <span>{formatCurrency(Number(subtotal ?? totalAmount + discount))}</span>
+            <span>{formatCurrency(Number(subtotal ?? totalAmount + discount - fee))}</span>
           </div>
-          <div className="flex justify-between">
-            <span>
-              Discount
-              {discountType === "percentage" && discountValue
-                ? ` (${Number(discountValue)}%)`
-                : ""}
-            </span>
-            <span>-{formatCurrency(discount)}</span>
-          </div>
+          {discount > 0 && (
+            <div className="flex justify-between">
+              <span>
+                Discount
+                {discountType === "percentage" && discountValue
+                  ? ` (${Number(discountValue)}%)`
+                  : ""}
+              </span>
+              <span>-{formatCurrency(discount)}</span>
+            </div>
+          )}
+          {fee > 0 && (
+            <div className="flex justify-between">
+              <span>Delivery fee</span>
+              <span>{formatCurrency(fee)}</span>
+            </div>
+          )}
         </>
       )}
       <div className="flex justify-between text-[14px] font-bold">
