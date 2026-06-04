@@ -8,8 +8,10 @@ import { toast } from "sonner";
 import { Loader2, ImagePlus, X } from "lucide-react";
 import {
   createProductSchema,
+  PACKAGING_TYPES,
   type CreateProductInput,
 } from "@/lib/validation/product";
+import { PACKAGING_TYPE_LABELS } from "@/lib/utils";
 import { Modal } from "@/components/shared/Editorial";
 import type { Product } from "@/types";
 
@@ -47,6 +49,7 @@ export function ProductModal({ product, onClose, onSaved }: Props) {
             : undefined,
           availabilityStatus: product.availabilityStatus,
           imageUrl: product.imageUrl ?? null,
+          packagingType: product.packagingType ?? "pack",
           unitsPerBottle: product.unitsPerBottle,
           bottlesPerCarton: product.bottlesPerCarton,
           stockUnits: product.stockUnits,
@@ -54,10 +57,12 @@ export function ProductModal({ product, onClose, onSaved }: Props) {
           minOrderQuantity: product.minOrderQuantity ?? 1,
           allowBottleSale: product.allowBottleSale,
           allowCartonSale: product.allowCartonSale,
+          allowTubeSale: product.allowTubeSale ?? false,
         }
       : {
           availabilityStatus: true,
           imageUrl: null,
+          packagingType: "pack" as const,
           unitsPerBottle: 1,
           bottlesPerCarton: 1,
           stockUnits: 0,
@@ -65,6 +70,7 @@ export function ProductModal({ product, onClose, onSaved }: Props) {
           minOrderQuantity: 1,
           allowBottleSale: true,
           allowCartonSale: false,
+          allowTubeSale: false,
         },
   });
 
@@ -75,12 +81,14 @@ export function ProductModal({ product, onClose, onSaved }: Props) {
       reset({
         availabilityStatus: true,
         imageUrl: null,
+        packagingType: "pack",
         unitsPerBottle: 1,
         bottlesPerCarton: 1,
         stockUnits: 0,
         lowStockThreshold: 10,
         allowBottleSale: true,
         allowCartonSale: false,
+        allowTubeSale: false,
       });
     }
   }, [product, reset]);
@@ -182,11 +190,22 @@ export function ProductModal({ product, onClose, onSaved }: Props) {
           />
         </Field>
 
+        {/* Packaging type */}
+        <Field label="Packaging type" error={errors.packagingType?.message}>
+          <select {...register("packagingType")} className="field">
+            {PACKAGING_TYPES.map((t) => (
+              <option key={t} value={t}>
+                {PACKAGING_TYPE_LABELS[t]}
+              </option>
+            ))}
+          </select>
+        </Field>
+
         {/* Packaging conversions */}
         <div className="rounded-lg bg-[hsl(var(--offwhite))] p-3.5">
-          <p className="eyebrow mb-3 text-[hsl(var(--red-2))]">Packaging</p>
+          <p className="eyebrow mb-3 text-[hsl(var(--red-2))]">Multi-level packaging</p>
           <div className="grid grid-cols-2 gap-3.5">
-            <Field label="Units per bottle" error={errors.unitsPerBottle?.message}>
+            <Field label="Units per bottle / tube" error={errors.unitsPerBottle?.message}>
               <input
                 {...register("unitsPerBottle", { valueAsNumber: true })}
                 type="number"
@@ -195,7 +214,7 @@ export function ProductModal({ product, onClose, onSaved }: Props) {
               />
             </Field>
             <Field
-              label="Bottles per carton"
+              label="Bottles / tubes per carton"
               error={errors.bottlesPerCarton?.message}
             >
               <input
@@ -215,6 +234,16 @@ export function ProductModal({ product, onClose, onSaved }: Props) {
               />
               <span className="text-[12.5px] text-[hsl(var(--navy))]">
                 Allow selling by the bottle
+              </span>
+            </label>
+            <label className="flex cursor-pointer items-center gap-2.5">
+              <input
+                {...register("allowTubeSale")}
+                type="checkbox"
+                className="h-4 w-4 rounded border-neutral-300 accent-[hsl(var(--red))]"
+              />
+              <span className="text-[12.5px] text-[hsl(var(--navy))]">
+                Allow selling by the tube
               </span>
             </label>
             <label className="flex cursor-pointer items-center gap-2.5">

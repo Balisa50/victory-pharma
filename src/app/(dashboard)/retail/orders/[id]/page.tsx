@@ -67,10 +67,10 @@ export default function RetailOrderDetailPage({
     );
   }
 
-  const canReview = order.status === "delivered" && !order.review;
-  const canComplain = !["delivered", "cancelled"].includes(order.status);
+  const canReview = (order.status === "delivered" || order.status === "completed") && !order.review;
+  const canComplain = !["delivered", "completed", "cancelled"].includes(order.status);
   const canPay =
-    !order.payment && !["delivered", "cancelled"].includes(order.status);
+    !order.payment && !["delivered", "completed", "cancelled"].includes(order.status);
 
   return (
     <>

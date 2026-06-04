@@ -5,7 +5,7 @@ export const createOrderSchema = z.object({
     .array(
       z.object({
         productId: z.string().cuid(),
-        packLevel: z.enum(["unit", "bottle", "carton"]),
+        packLevel: z.enum(["unit", "bottle", "tube", "carton"]),
         quantity: z.number().int().positive("Quantity must be at least 1"),
       })
     )
@@ -21,6 +21,7 @@ export const updateOrderStatusSchema = z.object({
     "packed",
     "out_for_delivery",
     "delivered",
+    "completed",
     "cancelled",
   ]),
 });

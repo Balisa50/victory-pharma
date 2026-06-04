@@ -9,7 +9,8 @@ const ALLOWED_TRANSITIONS: Record<string, string[]> = {
   confirmed: ["packed", "cancelled"],
   packed: ["out_for_delivery", "cancelled"],
   out_for_delivery: ["delivered", "cancelled"],
-  delivered: [], // locked
+  delivered: ["completed"],
+  completed: [], // locked — final state
   cancelled: [], // locked
 };
 
@@ -53,6 +54,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (parsed.data.status === "delivered" && order.payment?.status !== "confirmed" && !order.isCredit) {
     return NextResponse.json(
       { success: false, error: "Payment must be confirmed before marking as delivered" },
+      { status: 400 }
+    );
+  }
+
+  // completed is the terminal success state — void is not allowed from there.
+  if (parsed.data.status === "cancelled" && order.status === "completed") {
+    return NextResponse.json(
+      { success: false, error: "Completed orders cannot be voided" },
       { status: 400 }
     );
   }

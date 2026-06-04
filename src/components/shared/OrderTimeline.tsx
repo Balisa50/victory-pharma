@@ -8,6 +8,7 @@ const STATUS_ORDER: OrderStatus[] = [
   "packed",
   "out_for_delivery",
   "delivered",
+  "completed",
 ];
 
 export function OrderTimeline({ history }: { history: OrderStatusHistory[] }) {

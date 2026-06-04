@@ -9,13 +9,14 @@
  *   1 carton  = bottlesPerCarton bottles = unitsPerBottle x bottlesPerCarton units
  */
 
-export type PackLevel = "unit" | "bottle" | "carton";
+export type PackLevel = "unit" | "bottle" | "tube" | "carton";
 
-export const PACK_LEVELS: PackLevel[] = ["unit", "bottle", "carton"];
+export const PACK_LEVELS: PackLevel[] = ["unit", "bottle", "tube", "carton"];
 
 export const PACK_LABELS: Record<PackLevel, string> = {
-  unit: "Unit",
+  unit: "Pack",
   bottle: "Bottle",
+  tube: "Tube",
   carton: "Carton",
 };
 
@@ -28,7 +29,7 @@ export type Packaging = {
 /** Base units contained in one pack of the given level. */
 export function unitsForPack(p: Packaging, level: PackLevel): number {
   if (level === "unit") return 1;
-  if (level === "bottle") return Math.max(1, p.unitsPerBottle);
+  if (level === "bottle" || level === "tube") return Math.max(1, p.unitsPerBottle);
   return Math.max(1, p.unitsPerBottle) * Math.max(1, p.bottlesPerCarton);
 }
 
@@ -54,9 +55,11 @@ export function availablePackLevels(p: {
   bottlesPerCarton: number;
   allowBottleSale: boolean;
   allowCartonSale: boolean;
+  allowTubeSale?: boolean;
 }): PackLevel[] {
   const levels: PackLevel[] = ["unit"];
   if (p.allowBottleSale && p.unitsPerBottle > 1) levels.push("bottle");
+  if (p.allowTubeSale && p.unitsPerBottle > 1) levels.push("tube");
   if (p.allowCartonSale && p.unitsPerBottle * p.bottlesPerCarton > 1) {
     levels.push("carton");
   }

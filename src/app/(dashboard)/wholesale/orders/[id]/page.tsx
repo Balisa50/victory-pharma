@@ -21,6 +21,7 @@ const STATUS_ACTIONS: Record<string, { label: string; next: string }> = {
   confirmed: { label: "Mark packed", next: "packed" },
   packed: { label: "Mark dispatched", next: "out_for_delivery" },
   out_for_delivery: { label: "Confirm delivered", next: "delivered" },
+  delivered: { label: "Complete order", next: "completed" },
 };
 
 export default function WholesaleOrderDetailPage({
@@ -140,7 +141,7 @@ export default function WholesaleOrderDetailPage({
               </button>
             )}
             {order.payment?.status !== "confirmed" &&
-              !["delivered", "cancelled"].includes(order.status) && (
+              !["delivered", "completed", "cancelled"].includes(order.status) && (
                 <button
                   type="button"
                   onClick={() => setDiscountOpen(true)}
@@ -152,7 +153,7 @@ export default function WholesaleOrderDetailPage({
                     : "Apply discount"}
                 </button>
               )}
-            {!["delivered", "cancelled"].includes(order.status) && (
+            {!["delivered", "completed", "cancelled"].includes(order.status) && (
               <button
                 type="button"
                 onClick={() => setDeliveryOpen(true)}
@@ -177,7 +178,7 @@ export default function WholesaleOrderDetailPage({
                   Confirm payment
                 </button>
               )}
-            {["pending", "confirmed", "packed", "out_for_delivery"].includes(order.status) && (
+            {["pending", "confirmed", "packed", "out_for_delivery", "delivered"].includes(order.status) && (
               <button
                 onClick={() => setVoidOpen(true)}
                 disabled={!!actionLoading}
@@ -207,7 +208,14 @@ export default function WholesaleOrderDetailPage({
         {order.status === "delivered" && (
           <div className="mb-5 rounded-2xl border border-[hsl(var(--green))]/30 bg-[hsl(var(--green))]/5 px-6 py-3">
             <p className="text-[12.5px] text-[hsl(var(--navy))]">
-              Delivered — this order is locked from further changes.
+              Delivered — click <strong>Complete order</strong> to finalise and lock this order.
+            </p>
+          </div>
+        )}
+        {order.status === "completed" && (
+          <div className="mb-5 rounded-2xl border border-emerald-300/40 bg-emerald-50 px-6 py-3">
+            <p className="text-[12.5px] font-medium text-emerald-800">
+              Completed — this order is fully finalised and locked.
             </p>
           </div>
         )}

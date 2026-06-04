@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export const PACKAGING_TYPES = ["pack", "bottle", "tube", "carton"] as const;
+
 export const createProductSchema = z.object({
   name: z.string().min(2, "Product name is required"),
   category: z.string().min(1, "Category is required"),
@@ -13,6 +15,9 @@ export const createProductSchema = z.object({
     }, "Expiry date cannot be in the past"),
   availabilityStatus: z.boolean().default(true),
   imageUrl: z.string().url("Invalid image URL").nullable().optional(),
+
+  // Primary packaging descriptor
+  packagingType: z.enum(PACKAGING_TYPES).default("pack"),
 
   // Multi-level packaging configuration
   unitsPerBottle: z
@@ -36,6 +41,7 @@ export const createProductSchema = z.object({
     .default(1),
   allowBottleSale: z.boolean().default(true),
   allowCartonSale: z.boolean().default(false),
+  allowTubeSale: z.boolean().default(false),
 });
 
 export const updateProductSchema = createProductSchema.partial();

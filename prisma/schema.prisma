@@ -19,7 +19,15 @@ enum OrderStatus {
   packed
   out_for_delivery
   delivered
+  completed
   cancelled
+}
+
+enum PackagingType {
+  pack
+  bottle
+  tube
+  carton
 }
 
 enum PaymentMethod {
@@ -105,6 +113,9 @@ model Product {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
+  // Wholesale packaging descriptor — describes what form this product ships in.
+  packagingType     PackagingType @default(pack)
+
   // Multi-level packaging. Stock is tracked in base units; bottles and
   // cartons are derived via conversion rates.
   // Stock is split into two pools:
@@ -119,6 +130,7 @@ model Product {
   minOrderQuantity  Int     @default(1)   // MOQ in packs at the smallest sellable level
   allowBottleSale   Boolean @default(true)
   allowCartonSale   Boolean @default(false)
+  allowTubeSale     Boolean @default(false)
 
   orderItems     OrderItem[]
   stockMovements StockMovement[]

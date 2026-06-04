@@ -43,6 +43,7 @@ export const ORDER_STATUS_LABELS: Record<string, string> = {
   packed: "Packed",
   out_for_delivery: "Dispatched",
   delivered: "Delivered",
+  completed: "Completed",
   cancelled: "Cancelled",
 };
 
@@ -52,7 +53,15 @@ export const ORDER_STATUS_COLORS: Record<string, string> = {
   packed: "bg-purple-100 text-purple-800",
   out_for_delivery: "bg-orange-100 text-orange-800",
   delivered: "bg-green-100 text-green-800",
+  completed: "bg-emerald-100 text-emerald-800",
   cancelled: "bg-red-100 text-red-800",
+};
+
+export const PACKAGING_TYPE_LABELS: Record<string, string> = {
+  pack: "Pack",
+  bottle: "Bottle",
+  tube: "Tube",
+  carton: "Carton",
 };
 
 export const COMPLAINT_TYPE_LABELS: Record<string, string> = {
