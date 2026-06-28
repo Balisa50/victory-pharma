@@ -97,8 +97,8 @@ src/
 
 ## User Roles
 
-- **wholesale_admin** — manages products, orders, payments, complaints
-- **retail_pharmacy** — browses catalog, places orders, tracks delivery, reviews
+- **wholesale_admin** - manages products, orders, payments, complaints
+- **retail_pharmacy** - browses catalog, places orders, tracks delivery, reviews
 
 ## Key Flows
 
