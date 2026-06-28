@@ -188,7 +188,7 @@ export default function CartPage() {
                       Order on credit
                     </p>
                     <p className="text-[11.5px] text-neutral-400">
-                      Pay later — balance tracked in your account.
+                      Pay later - balance tracked in your account.
                     </p>
                   </div>
                   <input
