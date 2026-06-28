@@ -2,7 +2,7 @@
  * One-time backfill for the B2B approval workflow.
  * Grandfathers every account that existed before the feature: all current
  * users become `active`, and existing retail pharmacies receive a pharmacyId.
- * Safe to re-run — only touches rows missing a pharmacyId.
+ * Safe to re-run - only touches rows missing a pharmacyId.
  */
 import { PrismaClient } from "@prisma/client";
 
