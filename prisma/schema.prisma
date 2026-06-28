@@ -113,7 +113,7 @@ model Product {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
-  // Wholesale packaging descriptor — describes what form this product ships in.
+  // Wholesale packaging descriptor - describes what form this product ships in.
   packagingType     PackagingType @default(pack)
 
   // Multi-level packaging. Stock is tracked in base units; bottles and
@@ -345,7 +345,7 @@ model Complaint {
 // ─── Credit Sales & Debt Management ───────────────────────────────────────────
 
 // Records a payment made by a retail pharmacy towards their outstanding
-// credit balance. Not linked to a specific order — reduces overall debt.
+// credit balance. Not linked to a specific order - reduces overall debt.
 model CreditPayment {
   id               String        @id @default(cuid())
   retailPharmacyId String
