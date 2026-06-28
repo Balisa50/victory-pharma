@@ -1,7 +1,7 @@
 /**
  * One-time backfill for the warehouse layer.
  * Moves each product's legacy stockQuantity into availableUnits and sets a
- * sane unitsPerCarton. Safe to re-run — only seeds products still at zero.
+ * sane unitsPerCarton. Safe to re-run - only seeds products still at zero.
  */
 import { PrismaClient } from "@prisma/client";
 
