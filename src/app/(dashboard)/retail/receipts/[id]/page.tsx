@@ -149,7 +149,7 @@ export default function ReceiptDetailPage({
 
       <PageBody>
         <div className="flex flex-col items-center gap-3">
-          {/* On-screen paper slip — also the print target */}
+          {/* On-screen paper slip - also the print target */}
           <div className="rounded-xl bg-white shadow-[0_12px_40px_rgba(13,31,78,0.12)] ring-1 ring-[hsl(var(--navy))]/5">
             <ThermalReceipt
               receiptNumber={receipt.receiptNumber}
