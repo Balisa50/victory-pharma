@@ -10,7 +10,7 @@ function dashboardFor(role: string) {
     : "/retail/catalog";
 }
 
-// Pages in /wholesale that the manager role can NOT enter — admin-only spaces.
+// Pages in /wholesale that the manager role can NOT enter - admin-only spaces.
 const MANAGER_BLOCKED = [
   "/wholesale/users",
   "/wholesale/settings",
