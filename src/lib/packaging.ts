@@ -2,7 +2,7 @@
  * Multi-level pharmaceutical packaging.
  *
  * Stock is always tracked internally in BASE UNITS (the smallest sellable
- * item — a tablet, an ampoule, 1 ml). Bottles and cartons are derived from
+ * item - a tablet, an ampoule, 1 ml). Bottles and cartons are derived from
  * per-product conversion rates:
  *
  *   1 bottle  = unitsPerBottle base units
