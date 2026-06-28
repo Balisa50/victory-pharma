@@ -181,7 +181,7 @@ export default function ProfilePage() {
               <div>
                 <p className="eyebrow mb-1 text-[hsl(var(--red-2))]">Email</p>
                 <p className="text-[hsl(var(--navy))]">
-                  {data?.email ?? "—"}
+                  {data?.email ?? "-"}
                 </p>
                 <p className="mt-0.5 text-[11px] text-neutral-400">
                   Email cannot be changed here.
@@ -192,7 +192,7 @@ export default function ProfilePage() {
                   Pharmacy ID
                 </p>
                 <p className="font-mono text-[14px] font-medium text-[hsl(var(--navy))]">
-                  {data?.pharmacyId ?? "—"}
+                  {data?.pharmacyId ?? "-"}
                 </p>
               </div>
               <div>
@@ -200,7 +200,7 @@ export default function ProfilePage() {
                 <p className="text-[hsl(var(--green))]">
                   {data?.status === "active"
                     ? "Verified pharmacy"
-                    : data?.status ?? "—"}
+                    : data?.status ?? "-"}
                 </p>
               </div>
               {data?.verifiedAt && (
