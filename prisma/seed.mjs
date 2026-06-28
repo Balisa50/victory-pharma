@@ -3,7 +3,7 @@ import { createHash, randomBytes } from "crypto";
 
 // Simple bcrypt-compatible hash using 12 rounds approximation via node crypto
 // We'll use the prisma client with a pre-hashed password
-// Password: ChangeMe123! — bcrypt hash generated below
+// Password: ChangeMe123! - bcrypt hash generated below
 const ADMIN_PASSWORD_HASH =
   "$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LeKJqnqHu.Z9KYLTS";
 
@@ -24,7 +24,7 @@ async function main() {
   });
 
   if (existing) {
-    console.log("Admin already exists — skipping seed.");
+    console.log("Admin already exists - skipping seed.");
     return;
   }
 
