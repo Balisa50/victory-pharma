@@ -8,17 +8,17 @@
    ────────────────────────────────────────────── */
 @layer base {
   :root {
-    /* Brand palette — pharmacy-green across the whole app (HSL).
+    /* Brand palette - pharmacy-green across the whole app (HSL).
        --navy* keep their name for compatibility, but render as greens. */
-    --navy: 145 96% 11%;          /* #013821 — very deep green (sidebars) */
-    --navy-2: 150 98% 19%;        /* #015C2E — mid-deep green */
-    --navy-3: 147 98% 27%;        /* #017F40 — medium green */
-    --red: 10 100% 40%;           /* #cc2200 — destructive only */
-    --red-2: 12 79% 47%;          /* #d43a1a — alert accents (low stock, rejection) */
-    --orange: 147 98% 33%;        /* #02A554 — pharmacy green for italic accents */
-    --gold: 45 53% 54%;           /* #c8a84b — warm secondary accent */
+    --navy: 145 96% 11%;          /* #013821 - very deep green (sidebars) */
+    --navy-2: 150 98% 19%;        /* #015C2E - mid-deep green */
+    --navy-3: 147 98% 27%;        /* #017F40 - medium green */
+    --red: 10 100% 40%;           /* #cc2200 - destructive only */
+    --red-2: 12 79% 47%;          /* #d43a1a - alert accents (low stock, rejection) */
+    --orange: 147 98% 33%;        /* #02A554 - pharmacy green for italic accents */
+    --gold: 45 53% 54%;           /* #c8a84b - warm secondary accent */
     --gold-2: 48 86% 62%;         /* #f0c94a */
-    --green: 147 98% 33%;         /* #02A554 — primary brand */
+    --green: 147 98% 33%;         /* #02A554 - primary brand */
     --offwhite: 42 27% 95%;       /* #f5f3ee */
     --light: 145 30% 95%;         /* very pale green */
 
@@ -101,7 +101,7 @@
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-[13px] font-semibold tracking-wide transition-all disabled:cursor-not-allowed disabled:opacity-50;
   }
-  /* Primary affirmative button — pharmacy green. Kept the class name
+  /* Primary affirmative button - pharmacy green. Kept the class name
      `.btn-red` to avoid touching every callsite; semantically it is the
      primary CTA. Destructive actions should use `.btn-danger`. */
   .btn-red {
@@ -113,7 +113,7 @@
     transform: translateY(-1px);
   }
 
-  /* Destructive button — explicit red, for delete / reject / cancel. */
+  /* Destructive button - explicit red, for delete / reject / cancel. */
   .btn-danger {
     background: hsl(var(--red));
     @apply text-white;
