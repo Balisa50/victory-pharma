@@ -21,7 +21,7 @@ export type ThermalReceiptProps = {
   subtotal?: number | null;
   /** Amount the discount took off the subtotal. */
   discountAmount?: number | null;
-  /** "percentage" or "fixed" — used to annotate the discount line. */
+  /** "percentage" or "fixed" - used to annotate the discount line. */
   discountType?: string | null;
   discountValue?: number | null;
   /** Optional delivery fee added on top of (subtotal - discount). */
@@ -37,7 +37,7 @@ function Rule() {
 
 /**
  * POS-style thermal receipt (80mm). Rendered on screen and used as the
- * print target — see the `@media print` rules in globals.css.
+ * print target - see the `@media print` rules in globals.css.
  */
 export function ThermalReceipt({
   receiptNumber,
@@ -152,7 +152,7 @@ export function ThermalReceipt({
         <span>Payment</span>
         <span>
           {paymentMethod ? paymentMethod.replace(/_/g, " ") : "Not recorded"}
-          {" — "}
+          {" - "}
           {paid ? "PAID" : "PENDING"}
         </span>
       </div>
